@@ -148,6 +148,78 @@
         display: none;
       }
       
+      .language-selector {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(138, 43, 226, 0.2);
+        border: 2px solid rgba(138, 43, 226, 0.5);
+        border-radius: 50px;
+        padding: 12px 20px;
+        color: var(--fg);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .language-selector:hover {
+        background: rgba(138, 43, 226, 0.4);
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(138, 43, 226, 0.6);
+      }
+      
+      .language-dropdown {
+        position: fixed;
+        top: 80px;
+        left: 20px;
+        background: rgba(15, 23, 42, 0.95);
+        border: 2px solid rgba(138, 43, 226, 0.5);
+        border-radius: 15px;
+        padding: 15px;
+        backdrop-filter: blur(15px);
+        display: none;
+        max-height: 400px;
+        overflow-y: auto;
+        width: 280px;
+        z-index: 1000;
+      }
+      
+      .language-dropdown.show {
+        display: block;
+        animation: fadeInDown 0.3s ease-out;
+      }
+      
+      .language-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      
+      .language-option {
+        padding: 8px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 13px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .language-option:hover {
+        background: rgba(138, 43, 226, 0.3);
+        transform: scale(1.02);
+      }
+      
+      .language-option.active {
+        background: rgba(138, 43, 226, 0.6);
+        border-color: rgba(138, 43, 226, 0.8);
+      }
+      
       .volume-control.show {
         display: block;
         animation: fadeInDown 0.3s ease-out;
@@ -220,6 +292,17 @@
     </style>
   </head>
   <body>
+    <div class="language-selector" id="languageSelector">
+      <span id="langIcon">🌍</span>
+      <span id="langText">भाषा चुनें</span>
+    </div>
+    
+    <div class="language-dropdown" id="languageDropdown">
+      <div class="language-grid" id="languageGrid">
+        <!-- 言語オプションは JavaScript で生成 -->
+      </div>
+    </div>
+    
     <div class="music-control" id="musicControl">
       <span id="musicIcon">🎵</span>
       <span id="musicText">भारतीय संगीत</span>
@@ -247,22 +330,521 @@
       const targetMs = new Date("2025-08-24T21:00:00+09:00").getTime();
       const el = document.getElementById("seconds");
 
-      const devanagariDigits = [
-        "०",
-        "१",
-        "२",
-        "३",
-        "४",
-        "५",
-        "६",
-        "७",
-        "८",
-        "९",
-      ];
-      function toDevanagari(num) {
+      // 50言語以上の対応データ
+      const languages = {
+        'hi': { // ヒンディー語 (デフォルト)
+          name: 'हिन्दी',
+          flag: '🇮🇳',
+          top: 'प्रिय मित्र, आपके कॉल तक',
+          bottom: 'सेकंड हैं।',
+          digits: ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"],
+          music: 'भारतीय संगीत',
+          lang_select: 'भाषा चुनें'
+        },
+        'en': { // 英語
+          name: 'English',
+          flag: '🇺🇸',
+          top: 'Dear friend, until your call',
+          bottom: 'seconds remaining.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Indian Music',
+          lang_select: 'Select Language'
+        },
+        'ja': { // 日本語
+          name: '日本語',
+          flag: '🇯🇵',
+          top: '親愛なる友人、あなたの通話まで',
+          bottom: '秒です。',
+          digits: ["０", "１", "２", "３", "４", "５", "６", "７", "８", "９"],
+          music: 'インド音楽',
+          lang_select: '言語選択'
+        },
+        'ar': { // アラビア語
+          name: 'العربية',
+          flag: '🇸🇦',
+          top: 'عزيزي الصديق، حتى مكالمتك',
+          bottom: 'ثانية متبقية.',
+          digits: ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"],
+          music: 'الموسيقى الهندية',
+          lang_select: 'اختر اللغة'
+        },
+        'zh': { // 中国語
+          name: '中文',
+          flag: '🇨🇳',
+          top: '亲爱的朋友，距离您的通话还有',
+          bottom: '秒。',
+          digits: ["〇", "一", "二", "三", "四", "五", "六", "七", "八", "九"],
+          music: '印度音乐',
+          lang_select: '选择语言'
+        },
+        'es': { // スペイン語
+          name: 'Español',
+          flag: '🇪🇸',
+          top: 'Querido amigo, hasta tu llamada',
+          bottom: 'segundos restantes.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Música India',
+          lang_select: 'Seleccionar Idioma'
+        },
+        'fr': { // フランス語
+          name: 'Français',
+          flag: '🇫🇷',
+          top: 'Cher ami, jusqu\'à ton appel',
+          bottom: 'secondes restantes.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Musique Indienne',
+          lang_select: 'Choisir la Langue'
+        },
+        'de': { // ドイツ語
+          name: 'Deutsch',
+          flag: '🇩🇪',
+          top: 'Lieber Freund, bis zu deinem Anruf',
+          bottom: 'Sekunden verbleibend.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Indische Musik',
+          lang_select: 'Sprache Wählen'
+        },
+        'ru': { // ロシア語
+          name: 'Русский',
+          flag: '🇷🇺',
+          top: 'Дорогой друг, до твоего звонка',
+          bottom: 'секунд осталось.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Индийская Музыка',
+          lang_select: 'Выбрать Язык'
+        },
+        'pt': { // ポルトガル語
+          name: 'Português',
+          flag: '🇵🇹',
+          top: 'Caro amigo, até sua chamada',
+          bottom: 'segundos restantes.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Música Indiana',
+          lang_select: 'Selecionar Idioma'
+        },
+        'it': { // イタリア語
+          name: 'Italiano',
+          flag: '🇮🇹',
+          top: 'Caro amico, fino alla tua chiamata',
+          bottom: 'secondi rimanenti.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Musica Indiana',
+          lang_select: 'Seleziona Lingua'
+        },
+        'ko': { // 韓国語
+          name: '한국어',
+          flag: '🇰🇷',
+          top: '친애하는 친구, 당신의 통화까지',
+          bottom: '초 남았습니다.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: '인도 음악',
+          lang_select: '언어 선택'
+        },
+        'th': { // タイ語
+          name: 'ไทย',
+          flag: '🇹🇭',
+          top: 'เพื่อนรัก จนกว่าจะถึงการโทรของคุณ',
+          bottom: 'วินาทีเหลืออยู่',
+          digits: ["๐", "๑", "๒", "๓", "๔", "๕", "๖", "๗", "๘", "๙"],
+          music: 'เพลงอินเดีย',
+          lang_select: 'เลือกภาษา'
+        },
+        'vi': { // ベトナム語
+          name: 'Tiếng Việt',
+          flag: '🇻🇳',
+          top: 'Bạn thân mến, đến cuộc gọi của bạn',
+          bottom: 'giây còn lại.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Nhạc Ấn Độ',
+          lang_select: 'Chọn Ngôn Ngữ'
+        },
+        'tr': { // トルコ語
+          name: 'Türkçe',
+          flag: '🇹🇷',
+          top: 'Sevgili arkadaş, aramanıza kadar',
+          bottom: 'saniye kaldı.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Hint Müziği',
+          lang_select: 'Dil Seç'
+        },
+        'pl': { // ポーランド語
+          name: 'Polski',
+          flag: '🇵🇱',
+          top: 'Drogi przyjacielu, do twojego telefonu',
+          bottom: 'sekund pozostało.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Muzyka Indyjska',
+          lang_select: 'Wybierz Język'
+        },
+        'nl': { // オランダ語
+          name: 'Nederlands',
+          flag: '🇳🇱',
+          top: 'Beste vriend, tot je gesprek',
+          bottom: 'seconden over.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Indiase Muziek',
+          lang_select: 'Taal Kiezen'
+        },
+        'sv': { // スウェーデン語
+          name: 'Svenska',
+          flag: '🇸🇪',
+          top: 'Kära vän, till ditt samtal',
+          bottom: 'sekunder kvar.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Indisk Musik',
+          lang_select: 'Välj Språk'
+        },
+        'no': { // ノルウェー語
+          name: 'Norsk',
+          flag: '🇳🇴',
+          top: 'Kjære venn, til samtalen din',
+          bottom: 'sekunder igjen.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Indisk Musikk',
+          lang_select: 'Velg Språk'
+        },
+        'da': { // デンマーク語
+          name: 'Dansk',
+          flag: '🇩🇰',
+          top: 'Kære ven, til dit opkald',
+          bottom: 'sekunder tilbage.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Indisk Musik',
+          lang_select: 'Vælg Sprog'
+        },
+        'fi': { // フィンランド語
+          name: 'Suomi',
+          flag: '🇫🇮',
+          top: 'Rakas ystävä, puheluusi asti',
+          bottom: 'sekuntia jäljellä.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Intialainen Musiikki',
+          lang_select: 'Valitse Kieli'
+        },
+        'el': { // ギリシャ語
+          name: 'Ελληνικά',
+          flag: '🇬🇷',
+          top: 'Αγαπητέ φίλε, μέχρι την κλήση σου',
+          bottom: 'δευτερόλεπτα απομένουν.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Ινδική Μουσική',
+          lang_select: 'Επιλογή Γλώσσας'
+        },
+        'he': { // ヘブライ語
+          name: 'עברית',
+          flag: '🇮🇱',
+          top: 'חבר יקר, עד השיחה שלך',
+          bottom: 'שניות נותרו.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'מוזיקה הודית',
+          lang_select: 'בחר שפה'
+        },
+        'fa': { // ペルシア語
+          name: 'فارسی',
+          flag: '🇮🇷',
+          top: 'دوست عزیز، تا تماس شما',
+          bottom: 'ثانیه باقی مانده.',
+          digits: ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"],
+          music: 'موسیقی هندی',
+          lang_select: 'انتخاب زبان'
+        },
+        'ur': { // ウルドゥー語
+          name: 'اردو',
+          flag: '🇵🇰',
+          top: 'پیارے دوست، آپ کی کال تک',
+          bottom: 'سیکنڈ باقی ہیں۔',
+          digits: ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"],
+          music: 'بھارتی موسیقی',
+          lang_select: 'زبان منتخب کریں'
+        },
+        'bn': { // ベンガル語
+          name: 'বাংলা',
+          flag: '🇧🇩',
+          top: 'প্রিয় বন্ধু, তোমার কল পর্যন্ত',
+          bottom: 'সেকেন্ড বাকি।',
+          digits: ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"],
+          music: 'ভারতীয় সংগীত',
+          lang_select: 'ভাষা নির্বাচন'
+        },
+        'ta': { // タミル語
+          name: 'தமிழ்',
+          flag: '🇮🇳',
+          top: 'அன்பு நண்பா, உங்கள் அழைப்பு வரை',
+          bottom: 'வினாடிகள் உள்ளன.',
+          digits: ["௦", "௧", "௨", "௩", "௪", "௫", "௬", "௭", "௮", "௯"],
+          music: 'இந்திய இசை',
+          lang_select: 'மொழி தேர்வு'
+        },
+        'te': { // テルグ語
+          name: 'తెలుగు',
+          flag: '🇮🇳',
+          top: 'ప్రియమైన స్నేహితుడా, మీ కాల్ వరకు',
+          bottom: 'సెకన్లు ఉన్నాయి.',
+          digits: ["౦", "౧", "౨", "౩", "౪", "౫", "౬", "౭", "౮", "౯"],
+          music: 'భారతీయ సంగీతం',
+          lang_select: 'భాష ఎంపిక'
+        },
+        'ml': { // マラヤーラム語
+          name: 'മലയാളം',
+          flag: '🇮🇳',
+          top: 'പ്രിയ സുഹൃത്തേ, നിങ്ങളുടെ കാൾ വരെ',
+          bottom: 'സെക്കൻഡുകൾ ഉണ്ട്.',
+          digits: ["൦", "൧", "൨", "൩", "൪", "൫", "൬", "൭", "൮", "൯"],
+          music: 'ഇന്ത്യൻ സംഗീതം',
+          lang_select: 'ഭാഷ തിരഞ്ഞെടുക്കുക'
+        },
+        'kn': { // カンナダ語
+          name: 'ಕನ್ನಡ',
+          flag: '🇮🇳',
+          top: 'ಪ್ರಿಯ ಸ್ನೇಹಿತ, ನಿಮ್ಮ ಕಾಲ್ ವರೆಗೆ',
+          bottom: 'ಸೆಕೆಂಡುಗಳಿವೆ.',
+          digits: ["೦", "೧", "೨", "೩", "೪", "೫", "೬", "೭", "೮", "೯"],
+          music: 'ಭಾರತೀಯ ಸಂಗೀತ',
+          lang_select: 'ಭಾಷೆ ಆಯ್ಕೆ'
+        },
+        'gu': { // グジャラート語
+          name: 'ગુજરાતી',
+          flag: '🇮🇳',
+          top: 'પ્રિય મિત્ર, તમારા કોલ સુધી',
+          bottom: 'સેકન્ડ છે.',
+          digits: ["૦", "૧", "૨", "૩", "૪", "૫", "૬", "૭", "૮", "૯"],
+          music: 'ભારતીય સંગીત',
+          lang_select: 'ભાષા પસંદ કરો'
+        },
+        'pa': { // パンジャブ語
+          name: 'ਪੰਜਾਬੀ',
+          flag: '🇮🇳',
+          top: 'ਪਿਆਰੇ ਦੋਸਤ, ਤੁਹਾਡੀ ਕਾਲ ਤੱਕ',
+          bottom: 'ਸਕਿੰਟ ਹਨ।',
+          digits: ["੦", "੧", "੨", "੩", "੪", "੫", "੬", "੭", "੮", "੯"],
+          music: 'ਭਾਰਤੀ ਸੰਗੀਤ',
+          lang_select: 'ਭਾਸ਼ਾ ਚੁਣੋ'
+        },
+        'or': { // オリヤー語
+          name: 'ଓଡ଼ିଆ',
+          flag: '🇮🇳',
+          top: 'ପ୍ରିୟ ମିତ୍ର, ତୁମର କଲ୍ ପର୍ଯ୍ୟନ୍ତ',
+          bottom: 'ସେକେଣ୍ଡ ଅଛି।',
+          digits: ["୦", "୧", "୨", "୩", "୪", "୫", "୬", "୭", "୮", "୯"],
+          music: 'ଭାରତୀୟ ସଙ୍ଗୀତ',
+          lang_select: 'ଭାଷା ବାଛ'
+        },
+        'as': { // アッサム語
+          name: 'অসমীয়া',
+          flag: '🇮🇳',
+          top: 'প্ৰিয় বন্ধু, তোমাৰ কল পৰ্যন্ত',
+          bottom: 'চেকেণ্ড আছে।',
+          digits: ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"],
+          music: 'ভাৰতীয় সংগীত',
+          lang_select: 'ভাষা নিৰ্ব্বাচন'
+        },
+        'mr': { // マラーティー語
+          name: 'मराठी',
+          flag: '🇮🇳',
+          top: 'प्रिय मित्रा, तुझ्या कॉलपर्यंत',
+          bottom: 'सेकंद आहेत.',
+          digits: ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"],
+          music: 'भारतीय संगीत',
+          lang_select: 'भाषा निवडा'
+        },
+        'ne': { // ネパール語
+          name: 'नेपाली',
+          flag: '🇳🇵',
+          top: 'प्रिय साथी, तपाईंको कल सम्म',
+          bottom: 'सेकेन्ड छ।',
+          digits: ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"],
+          music: 'भारतीय संगीत',
+          lang_select: 'भाषा छान्नुहोस्'
+        },
+        'si': { // シンハラ語
+          name: 'සිංහල',
+          flag: '🇱🇰',
+          top: 'ආදරණීය මිත්‍රයා, ඔබේ ඇමතුම දක්වා',
+          bottom: 'තත්පර ඇත.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'ඉන්දියානු සංගීතය',
+          lang_select: 'භාෂාව තෝරන්න'
+        },
+        'my': { // ミャンマー語
+          name: 'မြန်မာ',
+          flag: '🇲🇲',
+          top: 'ချစ်သော မိတ်ဆွေ၊ သင်၏ ခေါ်ဆိုမှု အထိ',
+          bottom: 'စက္ကန့် ကျန်သည်။',
+          digits: ["၀", "၁", "၂", "၃", "၄", "၅", "၆", "၇", "၈", "၉"],
+          music: 'အိန္ဒိယ ဂီတ',
+          lang_select: 'ဘာသာစကား ရွေးချယ်ပါ'
+        },
+        'km': { // クメール語
+          name: 'ខ្មែរ',
+          flag: '🇰🇭',
+          top: 'មិត្តជាទីស្រឡាញ់ រហូតដល់ការហៅរបស់អ្នក',
+          bottom: 'វិនាទីនៅសល់។',
+          digits: ["០", "១", "២", "៣", "៤", "៥", "៦", "៧", "៨", "៩"],
+          music: 'តន្ត្រីឥណ្ឌា',
+          lang_select: 'ជ្រើសរើសភាសា'
+        },
+        'lo': { // ラオス語
+          name: 'ລາວ',
+          flag: '🇱🇦',
+          top: 'ເພື່ອນທີ່ຮັກແພງ, ຈົນກວ່າການໂທຂອງເຈົ້າ',
+          bottom: 'ວິນາທີເຫຼືອ.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'ດົນຕີອິນເດຍ',
+          lang_select: 'ເລືອກພາສາ'
+        },
+        'id': { // インドネシア語
+          name: 'Indonesia',
+          flag: '🇮🇩',
+          top: 'Teman terkasih, sampai panggilan Anda',
+          bottom: 'detik tersisa.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Musik India',
+          lang_select: 'Pilih Bahasa'
+        },
+        'ms': { // マレー語
+          name: 'Bahasa Melayu',
+          flag: '🇲🇾',
+          top: 'Sahabat tersayang, sehingga panggilan anda',
+          bottom: 'saat berbaki.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Muzik India',
+          lang_select: 'Pilih Bahasa'
+        },
+        'tl': { // タガログ語
+          name: 'Tagalog',
+          flag: '🇵🇭',
+          top: 'Mahal na kaibigan, hanggang sa tawag mo',
+          bottom: 'segundo ang natitira.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Musikang Indyano',
+          lang_select: 'Pumili ng Wika'
+        },
+        'sw': { // スワヒリ語
+          name: 'Kiswahili',
+          flag: '🇹🇿',
+          top: 'Rafiki mpendwa, hadi simu yako',
+          bottom: 'sekunde zimebakia.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Muziki wa Kihindi',
+          lang_select: 'Chagua Lugha'
+        },
+        'am': { // アムハラ語
+          name: 'አማርኛ',
+          flag: '🇪🇹',
+          top: 'ውድ ጓደኛ፣ እስከ ጥሪህ ድረስ',
+          bottom: 'ሰከንዶች ይቀራሉ።',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'የሕንድ ሙዚቃ',
+          lang_select: 'ቋንቋ ይምረጡ'
+        },
+        'yo': { // ヨルバ語
+          name: 'Yorùbá',
+          flag: '🇳🇬',
+          top: 'Ọ̀rẹ́ olùfẹ́, títí di ìpè rẹ',
+          bottom: 'ìṣẹ́jú kù.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Orin India',
+          lang_select: 'Yan Ede'
+        },
+        'ig': { // イボ語
+          name: 'Igbo',
+          flag: '🇳🇬',
+          top: 'Enyi m dị ọcha, ruo mgbe ị ga-akpọ',
+          bottom: 'sekọnd fọdụrụ.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Egwu India',
+          lang_select: 'Họrọ Asụsụ'
+        },
+        'zu': { // ズールー語
+          name: 'isiZulu',
+          flag: '🇿🇦',
+          top: 'Mngani othandekayo, kuze kube yikholi yakho',
+          bottom: 'amasekhondi asele.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Umculo waseNdiya',
+          lang_select: 'Khetha Ulimi'
+        },
+        'xh': { // コサ語
+          name: 'isiXhosa',
+          flag: '🇿🇦',
+          top: 'Mhlobo wam othandekayo, de kube yifowuni yakho',
+          bottom: 'imizuzwana eseleyo.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Umculo waseIndiya',
+          lang_select: 'Khetha Ulwimi'
+        },
+        'af': { // アフリカーンス語
+          name: 'Afrikaans',
+          flag: '🇿🇦',
+          top: 'Liewe vriend, tot jou oproep',
+          bottom: 'sekondes oor.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Indiese Musiek',
+          lang_select: 'Kies Taal'
+        },
+        'is': { // アイスランド語
+          name: 'Íslenska',
+          flag: '🇮🇸',
+          top: 'Kæri vinur, þangað til símtalið þitt',
+          bottom: 'sekúndur eftir.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Indversk Tónlist',
+          lang_select: 'Velja Tungumál'
+        },
+        'mt': { // マルタ語
+          name: 'Malti',
+          flag: '🇲🇹',
+          top: 'Ħabib għażiż, sa t-telefonata tiegħek',
+          bottom: 'sekondi fadal.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Mużika Indjana',
+          lang_select: 'Agħżel Lingwa'
+        },
+        'cy': { // ウェールズ語
+          name: 'Cymraeg',
+          flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+          top: 'Annwyl ffrind, tan eich galwad',
+          bottom: 'eiliad ar ôl.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Cerddoriaeth India',
+          lang_select: 'Dewiswch Iaith'
+        },
+        'ga': { // アイルランド語
+          name: 'Gaeilge',
+          flag: '🇮🇪',
+          top: 'A chara dílis, go dtí do ghlao',
+          bottom: 'soicind fágtha.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Ceol Indiach',
+          lang_select: 'Roghnaigh Teanga'
+        },
+        'eu': { // バスク語
+          name: 'Euskera',
+          flag: '🇪🇸',
+          top: 'Adiskide maitea, zure deialdia arte',
+          bottom: 'segundo geratzen dira.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Indiako Musika',
+          lang_select: 'Hizkuntza Hautatu'
+        },
+        'ca': { // カタルーニャ語
+          name: 'Català',
+          flag: '🇪🇸',
+          top: 'Estimat amic, fins a la teva trucada',
+          bottom: 'segons restants.',
+          digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          music: 'Música Índia',
+          lang_select: 'Selecciona Idioma'
+        }
+      };
+
+      let currentLang = 'hi';
+      const devanagariDigits = languages[currentLang].digits;
+      
+      function toCurrentLanguageDigits(num) {
         return String(num)
           .split("")
-          .map((d) => devanagariDigits[d] || d)
+          .map((d) => languages[currentLang].digits[d] || d)
           .join("");
       }
 
@@ -302,18 +884,26 @@
         }, 300);
       }
 
+      function updateLanguageDisplay() {
+        const lang = languages[currentLang];
+        document.querySelector('.label-top').textContent = lang.top;
+        document.querySelector('.label-bottom').textContent = lang.bottom;
+        document.getElementById('langText').textContent = lang.lang_select;
+        document.getElementById('musicText').textContent = lang.music;
+      }
+      
       function render() {
         const now = Date.now();
         const diffMs = Math.max(0, targetMs - now);
         const secs = Math.floor(diffMs / 1000);
-        const devanagariSecs = toDevanagari(secs);
+        const localizedSecs = toCurrentLanguageDigits(secs);
         
         if (previousSeconds !== null && previousSeconds !== secs) {
           addTransitionEffect();
           
           // 各桁のアニメーション
           const currentDigits = el.querySelectorAll('.digit-container');
-          const newDigits = devanagariSecs.split('');
+          const newDigits = localizedSecs.split('');
           
           if (currentDigits.length === newDigits.length) {
             newDigits.forEach((digit, index) => {
@@ -324,13 +914,13 @@
           } else {
             // 桁数が変わった場合は全体を再構築
             el.innerHTML = '';
-            const digitElements = createDigitElements(devanagariSecs);
+            const digitElements = createDigitElements(localizedSecs);
             digitElements.forEach(element => el.appendChild(element));
           }
         } else if (previousSeconds === null) {
           // 初回表示
           el.innerHTML = '';
-          const digitElements = createDigitElements(devanagariSecs);
+          const digitElements = createDigitElements(localizedSecs);
           digitElements.forEach(element => el.appendChild(element));
         }
         
@@ -484,6 +1074,72 @@
         }
       });
       
+      // 言語選択関連の設定
+      const languageSelector = document.getElementById('languageSelector');
+      const languageDropdown = document.getElementById('languageDropdown');
+      const languageGrid = document.getElementById('languageGrid');
+      let showingLanguageDropdown = false;
+      
+      // 言語オプションを動的生成
+      function populateLanguageOptions() {
+        languageGrid.innerHTML = '';
+        Object.entries(languages).forEach(([code, lang]) => {
+          const option = document.createElement('div');
+          option.className = 'language-option';
+          option.innerHTML = `${lang.flag} ${lang.name}`;
+          option.dataset.lang = code;
+          
+          if (code === currentLang) {
+            option.classList.add('active');
+          }
+          
+          option.addEventListener('click', () => {
+            // 前のアクティブを削除
+            document.querySelector('.language-option.active')?.classList.remove('active');
+            option.classList.add('active');
+            
+            // 言語変更
+            currentLang = code;
+            updateLanguageDisplay();
+            
+            // ドロップダウンを閉じる
+            toggleLanguageDropdown();
+            
+            // 数字表示を更新
+            previousSeconds = null;
+            render();
+          });
+          
+          languageGrid.appendChild(option);
+        });
+      }
+      
+      function toggleLanguageDropdown() {
+        showingLanguageDropdown = !showingLanguageDropdown;
+        if (showingLanguageDropdown) {
+          languageDropdown.classList.add('show');
+          populateLanguageOptions();
+        } else {
+          languageDropdown.classList.remove('show');
+        }
+      }
+      
+      languageSelector.addEventListener('click', toggleLanguageDropdown);
+      
+      // 外部クリックでドロップダウンを閉じる
+      document.addEventListener('click', (e) => {
+        if (!languageSelector.contains(e.target) && !languageDropdown.contains(e.target)) {
+          if (showingLanguageDropdown) {
+            toggleLanguageDropdown();
+          }
+        }
+        if (!musicControl.contains(e.target) && !volumeControl.contains(e.target)) {
+          if (showingVolumeControl) {
+            toggleVolumeControl();
+          }
+        }
+      });
+      
       // ページロード時に音楽を自動開始（ユーザーインタラクション後）
       document.addEventListener('click', function autoStart() {
         if (!isPlaying) {
@@ -491,7 +1147,9 @@
         }
         document.removeEventListener('click', autoStart);
       }, { once: true });
-
+      
+      // 初期化
+      updateLanguageDisplay();
       render();
       const timer = setInterval(render, 1000);
     </script>
