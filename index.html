@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="hi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>कॉल काउंटडाउन</title>
+    <style>
+      :root {
+        --fg: #e5e7eb;
+        --sub: #94a3b8;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: url("./bg.jpg") repeat;
+        color: var(--fg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto,
+          Noto Sans Devanagari, Noto Sans, Helvetica, Arial, "Apple Color Emoji",
+          "Segoe UI Emoji";
+      }
+      .wrap {
+        text-align: center;
+        padding: 24px 32px;
+        background: rgba(15, 23, 42, 0.7); /* 半透明の背景で文字を見やすく */
+        border-radius: 16px;
+      }
+      .label-top,
+      .label-bottom {
+        font-size: clamp(16px, 2.8vw, 24px);
+        letter-spacing: 0.06em;
+        color: var(--sub);
+        margin: 12px 0;
+      }
+      .seconds {
+        font-variant-numeric: tabular-nums;
+        font-weight: 800;
+        font-size: clamp(40px, 12vw, 160px);
+        line-height: 1;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap" role="main" aria-live="polite">
+      <div class="label-top">प्रिय मित्र, आपके कॉल तक</div>
+      <div id="seconds" class="seconds" aria-describedby="desc">०</div>
+      <div class="label-bottom">सेकंड हैं।</div>
+      <div id="desc" class="sr-only">
+        2025年8月24日21時00分（JST）までの残り秒数
+      </div>
+    </main>
+
+    <script>
+      const targetMs = new Date("2025-08-24T21:00:00+09:00").getTime();
+      const el = document.getElementById("seconds");
+
+      const devanagariDigits = [
+        "०",
+        "१",
+        "२",
+        "३",
+        "४",
+        "५",
+        "६",
+        "७",
+        "८",
+        "९",
+      ];
+      function toDevanagari(num) {
+        return String(num)
+          .split("")
+          .map((d) => devanagariDigits[d] || d)
+          .join("");
+      }
+
+      function render() {
+        const now = Date.now();
+        const diffMs = Math.max(0, targetMs - now);
+        const secs = Math.floor(diffMs / 1000);
+        el.textContent = toDevanagari(secs);
+        if (diffMs === 0) {
+          clearInterval(timer);
+        }
+      }
+
+      render();
+      const timer = setInterval(render, 1000);
+    </script>
+  </body>
+</html>
