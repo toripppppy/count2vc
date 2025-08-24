@@ -42,6 +42,63 @@
         font-weight: 800;
         font-size: clamp(40px, 12vw, 160px);
         line-height: 1;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        text-shadow: 
+          0 0 20px rgba(255, 215, 0, 0.8),
+          0 0 40px rgba(255, 165, 0, 0.6),
+          0 0 60px rgba(255, 105, 180, 0.4);
+        animation: glow 2s ease-in-out infinite alternate;
+      }
+      
+      @keyframes glow {
+        from {
+          text-shadow: 
+            0 0 20px rgba(255, 215, 0, 0.8),
+            0 0 40px rgba(255, 165, 0, 0.6),
+            0 0 60px rgba(255, 105, 180, 0.4);
+        }
+        to {
+          text-shadow: 
+            0 0 30px rgba(255, 215, 0, 1),
+            0 0 50px rgba(255, 165, 0, 0.8),
+            0 0 70px rgba(255, 105, 180, 0.6);
+        }
+      }
+      
+      .seconds.changing {
+        transform: scale(1.2) rotateY(360deg);
+        filter: hue-rotate(180deg) saturate(2);
+      }
+      
+      .digit-container {
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+        vertical-align: top;
+      }
+      
+      .digit {
+        display: inline-block;
+        transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        position: relative;
+      }
+      
+      .digit.flipping {
+        transform: rotateX(90deg) scale(0.8);
+      }
+      
+      .digit.new-digit {
+        transform: rotateX(0deg) scale(1);
+      }
+      
+      @keyframes party {
+        0% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.3) rotate(10deg); }
+        50% { transform: scale(1.1) rotate(-10deg); }
+        75% { transform: scale(1.4) rotate(5deg); }
+        100% { transform: scale(1) rotate(0deg); }
       }
       .sr-only {
         position: absolute;
@@ -89,13 +146,80 @@
           .join("");
       }
 
+      let previousSeconds = null;
+      
+      function addTransitionEffect() {
+        el.classList.add('changing');
+        setTimeout(() => {
+          el.classList.remove('changing');
+        }, 800);
+      }
+      
+      function createDigitElements(digitStr) {
+        return digitStr.split('').map(digit => {
+          const container = document.createElement('span');
+          container.className = 'digit-container';
+          const digitSpan = document.createElement('span');
+          digitSpan.className = 'digit';
+          digitSpan.textContent = digit;
+          container.appendChild(digitSpan);
+          return container;
+        });
+      }
+      
+      function animateDigitChange(container, newDigit) {
+        const digitSpan = container.querySelector('.digit');
+        digitSpan.classList.add('flipping');
+        
+        setTimeout(() => {
+          digitSpan.textContent = newDigit;
+          digitSpan.classList.remove('flipping');
+          digitSpan.classList.add('new-digit');
+          
+          setTimeout(() => {
+            digitSpan.classList.remove('new-digit');
+          }, 600);
+        }, 300);
+      }
+
       function render() {
         const now = Date.now();
         const diffMs = Math.max(0, targetMs - now);
         const secs = Math.floor(diffMs / 1000);
-        el.textContent = toDevanagari(secs);
+        const devanagariSecs = toDevanagari(secs);
+        
+        if (previousSeconds !== null && previousSeconds !== secs) {
+          addTransitionEffect();
+          
+          // 各桁のアニメーション
+          const currentDigits = el.querySelectorAll('.digit-container');
+          const newDigits = devanagariSecs.split('');
+          
+          if (currentDigits.length === newDigits.length) {
+            newDigits.forEach((digit, index) => {
+              if (currentDigits[index]) {
+                animateDigitChange(currentDigits[index], digit);
+              }
+            });
+          } else {
+            // 桁数が変わった場合は全体を再構築
+            el.innerHTML = '';
+            const digitElements = createDigitElements(devanagariSecs);
+            digitElements.forEach(element => el.appendChild(element));
+          }
+        } else if (previousSeconds === null) {
+          // 初回表示
+          el.innerHTML = '';
+          const digitElements = createDigitElements(devanagariSecs);
+          digitElements.forEach(element => el.appendChild(element));
+        }
+        
+        previousSeconds = secs;
+        
         if (diffMs === 0) {
           clearInterval(timer);
+          // カウントダウン終了時の特別エフェクト
+          el.style.animation = 'glow 0.5s ease-in-out infinite alternate, party 2s ease-in-out infinite';
         }
       }
 
