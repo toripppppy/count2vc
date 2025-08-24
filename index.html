@@ -103,6 +103,21 @@
         100% { transform: scale(1) rotate(0deg); }
       }
       
+      /* 隠れイースターエッグ用のスタイル */
+      .konami-mode {
+        animation: rainbow 2s linear infinite, bounce 1s ease-in-out infinite alternate !important;
+      }
+      
+      @keyframes rainbow {
+        0% { filter: hue-rotate(0deg) saturate(2); }
+        100% { filter: hue-rotate(360deg) saturate(2); }
+      }
+      
+      @keyframes bounce {
+        0% { transform: translateY(0px) scale(1); }
+        100% { transform: translateY(-20px) scale(1.1); }
+      }
+      
       .music-control {
         position: fixed;
         top: 20px;
@@ -1147,6 +1162,54 @@
         }
         document.removeEventListener('click', autoStart);
       }, { once: true });
+      
+      // 隠しイースターエッグ: コナミコマンド
+      let konamiCode = [];
+      const konamiSequence = [
+        'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
+        'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
+        'KeyB', 'KeyA'
+      ];
+      
+      document.addEventListener('keydown', (e) => {
+        konamiCode.push(e.code);
+        if (konamiCode.length > konamiSequence.length) {
+          konamiCode.shift();
+        }
+        
+        if (konamiCode.length === konamiSequence.length &&
+            konamiCode.every((code, index) => code === konamiSequence[index])) {
+          // コナミコマンド成功！
+          el.classList.add('konami-mode');
+          
+          // 5秒後に元に戻す
+          setTimeout(() => {
+            el.classList.remove('konami-mode');
+          }, 5000);
+          
+          // 特別メッセージを一時的に表示
+          const originalTop = document.querySelector('.label-top').textContent;
+          const originalBottom = document.querySelector('.label-bottom').textContent;
+          
+          document.querySelector('.label-top').textContent = '🎉 SECRET UNLOCKED! 🎉';
+          document.querySelector('.label-bottom').textContent = 'Ultimate countdown mode activated!';
+          
+          setTimeout(() => {
+            document.querySelector('.label-top').textContent = originalTop;
+            document.querySelector('.label-bottom').textContent = originalBottom;
+          }, 3000);
+          
+          konamiCode = [];
+        }
+      });
+      
+      // スペースキーで音楽トグル
+      document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+          e.preventDefault();
+          toggleMusic();
+        }
+      });
       
       // 初期化
       updateLanguageDisplay();
