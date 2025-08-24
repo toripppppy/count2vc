@@ -3,7 +3,38 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>कॉल काउंटडाउन</title>
+    <title>कॉल काउंटडाउン - Call Countdown Timer</title>
+    
+    <!-- SEO メタデータ -->
+    <meta name="description" content="美しいインド風デザインのカウントダウンタイマー。50以上の言語に対応し、リアルタイムで特定の日時までの時間を表示。ヒンディー語、日本語、英語など多言語サポート。" />
+    <meta name="keywords" content="countdown timer, カウントダウン, タイマー, 多言語, インド, ヒンディー語, 日本語, countdown, timer, multilingual" />
+    <meta name="author" content="Call Countdown App" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph メタタグ -->
+    <meta property="og:title" content="कॉल काउंटडाウन - Beautiful Countdown Timer" />
+    <meta property="og:description" content="多言語対応の美しいカウントダウンタイマー。インド音楽とエレガントなアニメーションで時間をカウント。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="hi_IN" />
+    <meta property="og:locale:alternate" content="ja_JP" />
+    <meta property="og:locale:alternate" content="en_US" />
+    
+    <!-- Twitter Card メタタグ -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="कॉल काउंटडाウन - Call Countdown Timer" />
+    <meta name="twitter:description" content="50言語対応の美しいカウントダウンタイマー" />
+    
+    <!-- その他の重要なメタタグ -->
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="canonical" href="#" />
+    
+    <!-- セキュリティヘッダー -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; media-src data:; connect-src 'self';" />
     <style>
       :root {
         --fg: #e5e7eb;
@@ -16,7 +47,7 @@
       body {
         margin: 0;
         background: url("./bg.jpg") repeat;
-        background-attachment: fixed;
+        /* パフォーマンス最適化: background-attachment: fixedを削除 */
         color: var(--fg);
         display: flex;
         align-items: center;
@@ -25,12 +56,20 @@
           Noto Sans Devanagari, Noto Sans, Helvetica, Arial, "Apple Color Emoji",
           "Segoe UI Emoji";
         overflow: hidden;
+        /* GPU加速のためのパフォーマンス最適化 */
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        /* will-changeを最適化 - 必要な時のみ設定 */
       }
       .wrap {
         text-align: center;
         padding: 24px 32px;
         background: rgba(15, 23, 42, 0.7); /* 半透明の背景で文字を見やすく */
         border-radius: 16px;
+        /* パフォーマンス最適化 - 静的要素なのでwill-changeは不要 */
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        contain: layout style paint; /* 描画最適化 */
       }
       .label-top,
       .label-bottom {
@@ -45,13 +84,21 @@
         font-size: clamp(40px, 12vw, 160px);
         line-height: 1;
         position: relative;
-        overflow: hidden;
-        transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        overflow: visible;
+        transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         text-shadow: 
           0 0 20px rgba(255, 215, 0, 0.8),
           0 0 40px rgba(255, 165, 0, 0.6),
-          0 0 60px rgba(255, 105, 180, 0.4);
+          0 0 60px rgba(255, 105, 180, 0.4),
+          0 5px 20px rgba(0, 0, 0, 0.3);
         animation: glow 2s ease-in-out infinite alternate;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+        /* GPU加速とパフォーマンス最適化 */
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        /* will-changeは動的に制御 */
+        contain: layout style paint;
       }
       
       @keyframes glow {
@@ -70,37 +117,296 @@
       }
       
       .seconds.changing {
-        transform: scale(1.2) rotateY(360deg);
-        filter: hue-rotate(180deg) saturate(2);
+        transform: scale(1.1);
+        filter: hue-rotate(45deg) saturate(1.5) brightness(1.3);
+        text-shadow: 
+          0 0 30px rgba(255, 215, 0, 1),
+          0 0 50px rgba(255, 165, 0, 0.8),
+          0 0 70px rgba(255, 105, 180, 0.6),
+          0 10px 30px rgba(0, 0, 0, 0.4);
+        animation: glow 0.8s ease-in-out infinite alternate, pulseScale 1.2s ease-in-out;
+      }
+      
+      @keyframes pulseScale {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
       }
       
       .digit-container {
         display: inline-block;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
         vertical-align: top;
+        perspective: 300px;
+        transform-style: preserve-3d;
+        margin: 0 2px;
+        /* パフォーマンス最適化 */
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        /* will-changeは動的に制御（JavaScript側で管理） */
+        contain: layout style paint;
+        isolation: isolate; /* 描画コンテキストを分離 */
+      }
+      
+      .digit-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(255, 215, 0, 0.1), rgba(255, 105, 180, 0.1));
+        border-radius: 8px;
+        opacity: 0;
+        transition: opacity 0.6s ease;
+        z-index: -1;
+      }
+      
+      .digit-container.animating::before {
+        opacity: 1;
+        animation: digitGlow 0.8s ease-out;
+      }
+      
+      @keyframes digitGlow {
+        0% { opacity: 0; transform: scale(0.8); }
+        50% { opacity: 1; transform: scale(1.2); }
+        100% { opacity: 0; transform: scale(1); }
       }
       
       .digit {
         display: inline-block;
-        transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         position: relative;
+        transform-origin: 50% 50%;
+        transform-style: preserve-3d;
+        /* パフォーマンス最適化 */
+        backface-visibility: hidden;
+        /* will-changeは動的に制御（JavaScript側で管理） */
+        contain: layout style paint;
       }
       
-      .digit.flipping {
-        transform: rotateX(90deg) scale(0.8);
+      .digit::before {
+        content: attr(data-digit);
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0.3;
+        transform: rotateX(-90deg) translateZ(20px);
+        transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        color: rgba(255, 215, 0, 0.6);
+      }
+      
+      .digit::after {
+        content: attr(data-digit);
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0.2;
+        transform: rotateX(90deg) translateZ(-20px);
+        transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        color: rgba(255, 105, 180, 0.6);
+      }
+      
+      .digit.flipping-out {
+        transform: rotateX(-90deg) scale(0.9);
+        opacity: 0;
+        filter: blur(2px);
+      }
+      
+      .digit.flipping-in {
+        transform: rotateX(90deg) scale(0.9);
+        opacity: 0;
+        filter: blur(2px);
       }
       
       .digit.new-digit {
         transform: rotateX(0deg) scale(1);
+        opacity: 1;
+        filter: blur(0px);
+        animation: digitBounce 0.6s ease-out;
+      }
+      
+      @keyframes digitBounce {
+        0% { transform: rotateX(0deg) scale(0.8); }
+        40% { transform: rotateX(0deg) scale(1.1); }
+        60% { transform: rotateX(0deg) scale(0.95); }
+        100% { transform: rotateX(0deg) scale(1); }
       }
       
       @keyframes party {
         0% { transform: scale(1) rotate(0deg); }
-        25% { transform: scale(1.3) rotate(10deg); }
-        50% { transform: scale(1.1) rotate(-10deg); }
-        75% { transform: scale(1.4) rotate(5deg); }
+        25% { transform: scale(1.2) rotate(5deg); }
+        50% { transform: scale(0.9) rotate(-5deg); }
+        75% { transform: scale(1.3) rotate(3deg); }
         100% { transform: scale(1) rotate(0deg); }
+      }
+      
+      @keyframes digitExplosion {
+        0% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.5) rotate(180deg); }
+        50% { transform: scale(1.2) rotate(360deg); }
+        75% { transform: scale(1.8) rotate(540deg); }
+        100% { transform: scale(1) rotate(720deg); }
+      }
+      
+      @keyframes particleExplode {
+        0% {
+          transform: translate(0, 0) scale(1) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(calc(var(--end-x) - var(--start-x, 0px)), calc(var(--end-y) - var(--start-y, 0px))) scale(0.2) rotate(720deg);
+          opacity: 0;
+        }
+      }
+      
+      @keyframes finalCountdown {
+        0% { filter: hue-rotate(0deg) saturate(1); }
+        25% { filter: hue-rotate(90deg) saturate(2); }
+        50% { filter: hue-rotate(180deg) saturate(1.5); }
+        75% { filter: hue-rotate(270deg) saturate(2); }
+        100% { filter: hue-rotate(360deg) saturate(1); }
+      }
+      
+      /* 新しいアニメーション効果 */
+      @keyframes smoothGlow {
+        0% {
+          text-shadow: 
+            0 0 20px rgba(255, 215, 0, 0.8),
+            0 0 40px rgba(255, 165, 0, 0.6),
+            0 0 60px rgba(255, 105, 180, 0.4);
+        }
+        50% {
+          text-shadow: 
+            0 0 30px rgba(255, 215, 0, 1),
+            0 0 60px rgba(255, 165, 0, 0.8),
+            0 0 90px rgba(255, 105, 180, 0.6),
+            0 0 120px rgba(0, 255, 255, 0.4);
+        }
+        100% {
+          text-shadow: 
+            0 0 25px rgba(255, 215, 0, 0.9),
+            0 0 50px rgba(255, 165, 0, 0.7),
+            0 0 75px rgba(255, 105, 180, 0.5);
+        }
+      }
+      
+      @keyframes cascadeIn {
+        0% {
+          opacity: 0;
+          transform: translateY(50px) rotateX(90deg) scale(0.8);
+        }
+        60% {
+          opacity: 0.8;
+          transform: translateY(-10px) rotateX(-10deg) scale(1.05);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) rotateX(0deg) scale(1);
+        }
+      }
+      
+      @keyframes digitPulse {
+        0%, 100% {
+          transform: scale(1);
+          filter: brightness(1);
+        }
+        50% {
+          transform: scale(1.05);
+          filter: brightness(1.2);
+        }
+      }
+      
+      /* モーションブラー効果 */
+      .digit.motion-blur {
+        animation: motionBlur 0.3s ease-out;
+      }
+      
+      @keyframes motionBlur {
+        0% {
+          filter: blur(0px);
+          transform: translateX(0);
+        }
+        50% {
+          filter: blur(3px);
+          transform: translateX(5px);
+        }
+        100% {
+          filter: blur(0px);
+          transform: translateX(0);
+        }
+      }
+      
+      /* ホログラフィック効果 */
+      .seconds.holographic {
+        background: linear-gradient(
+          45deg,
+          rgba(255, 0, 150, 0.1),
+          rgba(0, 255, 255, 0.1),
+          rgba(255, 255, 0, 0.1),
+          rgba(255, 0, 150, 0.1)
+        );
+        background-size: 200% 200%;
+        animation: holographicShift 3s ease-in-out infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent;
+      }
+      
+      @keyframes holographicShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      
+      @keyframes hoverParticle {
+        0% {
+          opacity: 1;
+          transform: translateY(0) scale(1) rotate(0deg);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-30px) scale(0.5) rotate(360deg);
+        }
+      }
+      
+      /* パフォーマンスモードのスタイル */
+      .performance-mode .digit {
+        transition: all 0.3s ease !important;
+      }
+      
+      .performance-mode .seconds {
+        animation-duration: 3s !important;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
+      }
+      
+      .performance-mode .digit-container::before {
+        display: none !important;
+      }
+      
+      /* 低性能デバイス専用の更なる最適化 */
+      .low-performance .digit {
+        transition: opacity 0.2s ease !important;
+        transform: none !important;
+      }
+      .low-performance .seconds {
+        text-shadow: none !important;
+        filter: none !important;
+        animation: none !important;
+      }
+      .low-performance .digit-container {
+        perspective: none !important;
+        transform-style: flat !important;
+      }
+      
+      /* 中性能デバイス用の適度な最適化 */
+      .medium-performance .digit {
+        transition: all 0.4s ease !important;
+      }
+      .medium-performance .seconds {
+        text-shadow: 0 0 15px rgba(255, 215, 0, 0.7) !important;
       }
       
       /* 隠れイースターエッグ用のスタイル */
@@ -134,12 +440,43 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        user-select: none;
+        min-width: 160px;
+        justify-content: center;
+      }
+      
+      .music-control:focus {
+        outline: 2px solid rgba(255, 215, 0, 0.8);
+        outline-offset: 2px;
       }
       
       .music-control:hover {
         background: rgba(255, 215, 0, 0.4);
         transform: scale(1.05);
         box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+      }
+      
+      .music-control.loading {
+        opacity: 0.7;
+        cursor: wait;
+        animation: loadingPulse 1s ease-in-out infinite;
+      }
+      
+      @keyframes loadingPulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 0.4; }
+      }
+      
+      .music-control.error {
+        background: rgba(239, 68, 68, 0.3);
+        border-color: rgba(239, 68, 68, 0.6);
+        animation: errorShake 0.5s ease-in-out;
+      }
+      
+      @keyframes errorShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
       }
       
       .music-control.playing {
@@ -158,9 +495,19 @@
         background: rgba(255, 215, 0, 0.2);
         border: 2px solid rgba(255, 215, 0, 0.5);
         border-radius: 20px;
-        padding: 10px;
+        padding: 15px;
         backdrop-filter: blur(10px);
         display: none;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+        min-width: 140px;
+      }
+      
+      .volume-label {
+        font-size: 12px;
+        color: var(--fg);
+        opacity: 0.8;
       }
       
       .language-selector {
@@ -179,6 +526,11 @@
         display: flex;
         align-items: center;
         gap: 8px;
+      }
+      
+      .language-selector:focus {
+        outline: 2px solid rgba(138, 43, 226, 0.8);
+        outline-offset: 2px;
       }
       
       .language-selector:hover {
@@ -251,6 +603,17 @@
         }
       }
       
+      @keyframes fadeOutUp {
+        from {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+      }
+      
       .volume-slider {
         width: 100px;
         height: 4px;
@@ -258,6 +621,14 @@
         border-radius: 2px;
         outline: none;
         appearance: none;
+        cursor: pointer;
+      }
+      
+      .volume-value {
+        font-size: 11px;
+        color: var(--fg);
+        opacity: 0.9;
+        font-weight: 600;
       }
       
       .volume-slider::-webkit-slider-thumb {
@@ -304,13 +675,73 @@
         white-space: nowrap;
         border: 0;
       }
+      
+      /* レスポンシブデザイン最適化 */
+      @media (max-width: 768px) {
+        .wrap {
+          padding: 16px 20px;
+          margin: 10px;
+        }
+        
+        .language-selector, .music-control {
+          padding: 8px 12px;
+          font-size: 12px;
+          min-width: 120px;
+        }
+        
+        .seconds {
+          font-size: clamp(30px, 10vw, 100px);
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .language-dropdown {
+          width: 250px;
+          left: 10px;
+        }
+        
+        .volume-control {
+          right: 10px;
+          min-width: 120px;
+        }
+        
+        .seconds {
+          font-size: clamp(24px, 8vw, 80px);
+        }
+      }
+      
+      /* プリント用スタイル */
+      @media print {
+        .language-selector, .music-control, .volume-control, .language-dropdown {
+          display: none !important;
+        }
+        
+        body {
+          background: white !important;
+          color: black !important;
+        }
+        
+        .wrap {
+          background: transparent !important;
+          color: black !important;
+        }
+      }
+      
+      /* 動きを減らすアクセシビリティ設定 */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
     </style>
   </head>
   <body>
-    <div class="language-selector" id="languageSelector">
-      <span id="langIcon">🌍</span>
+    <button class="language-selector" id="languageSelector" type="button" aria-label="言語選択" aria-expanded="false">
+      <span id="langIcon" aria-hidden="true">🌍</span>
       <span id="langText">भाषा चुनें</span>
-    </div>
+    </button>
     
     <div class="language-dropdown" id="languageDropdown">
       <div class="language-grid" id="languageGrid">
@@ -318,31 +749,31 @@
       </div>
     </div>
     
-    <div class="music-control" id="musicControl">
-      <span id="musicIcon">🎵</span>
+    <button class="music-control" id="musicControl" type="button" aria-label="音楽の再生・停止">
+      <span id="musicIcon" aria-hidden="true">🎵</span>
       <span id="musicText">भारतीय संगीत</span>
-    </div>
+    </button>
     
     <div class="volume-control" id="volumeControl">
-      <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="0.5">
+      <div class="volume-label">🔊 音量調整</div>
+      <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="0.5" aria-label="音量調整">
+      <div class="volume-value" id="volumeValue">50%</div>
+      <div style="font-size: 10px; opacity: 0.7; text-align: center; margin-top: 5px;">右クリック or 長押しで表示</div>
     </div>
 
-    <main class="wrap" role="main" aria-live="polite">
-      <div class="label-top">प्रिय मित्र, आपके कॉल तक</div>
-      <div id="seconds" class="seconds" aria-describedby="desc">०</div>
-      <div class="label-bottom">सेकंड हैं।</div>
+    <main class="wrap" role="main">
+      <header class="label-top">प्रिय मित्र, आपके कॉल तक</header>
+      <div id="seconds" class="seconds" role="timer" aria-live="polite" aria-label="カウントダウン" aria-describedby="desc">०</div>
+      <footer class="label-bottom">सेकंड हैं।</footer>
       <div id="desc" class="sr-only">
-        2025年8月24日21時00分（JST）までの残り秒数
+        2025年8月24日21時00分（JST）までの残り秒数のリアルタイム表示
       </div>
     </main>
     
-    <audio id="bgMusic" loop>
-      <source src="https://www.soundjay.com/misc/sounds/indian-flute-1.wav" type="audio/wav">
-      <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTuR2fDKdy4FJm7A7uSXRgwJXrfn5qxZEwk/ltryxnkpBSl+zPLaizsHGW/E7+OWT" type="audio/wav">
-    </audio>
+    <!-- 音楽は完全にWeb Audio APIで生成 -->
 
     <script>
-      const targetMs = new Date("2025-08-24T21:00:00+09:00").getTime();
+      const targetMs = new Date("2025-08-25T21:00:00+09:00").getTime();
       const el = document.getElementById("seconds");
 
       // 50言語以上の対応データ
@@ -865,91 +1296,620 @@
 
       let previousSeconds = null;
       
+      // 改良されたトランジション効果
       function addTransitionEffect() {
         el.classList.add('changing');
         setTimeout(() => {
           el.classList.remove('changing');
-        }, 800);
+        }, 1200);
+      }
+      
+      // 高度なパフォーマンス最適化されたアニメーション制御
+      const animationQueue = new Map();
+      let animationFrame = null;
+      let isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      
+      // パフォーマンス最適化: DOM要素のキャッシュ
+      const cachedElements = new Map();
+      const elementCache = {
+        get: (selector) => {
+          if (!cachedElements.has(selector)) {
+            cachedElements.set(selector, document.querySelector(selector));
+          }
+          return cachedElements.get(selector);
+        },
+        clear: () => cachedElements.clear(),
+        delete: (selector) => cachedElements.delete(selector)
+      };
+      
+      // 最適化されたアニメーションスケジューラー
+      function scheduleAnimation(element, callback) {
+        if (!element || !element.isConnected) return;
+        
+        if (isReducedMotion) {
+          callback();
+          return;
+        }
+        
+        const id = element.dataset.animId || Math.random().toString(36).substr(2, 9);
+        element.dataset.animId = id;
+        
+        animationQueue.set(id, {
+          callback: callback,
+          element: element,
+          timestamp: performance.now()
+        });
+        
+        if (animationFrame) {
+          cancelAnimationFrame(animationFrame);
+        }
+        
+        animationFrame = requestAnimationFrame(() => {
+          const currentTime = performance.now();
+          animationQueue.forEach((data, id) => {
+            if (data.element.isConnected && (currentTime - data.timestamp < 16.67)) {
+              try {
+                data.callback();
+              } catch (error) {
+                console.warn('アニメーションエラー:', error);
+              }
+            }
+            animationQueue.delete(id);
+          });
+          animationFrame = null;
+        });
+      }
+      
+      // 強化されたパフォーマンス監視と最適化システム
+      let lastFrameTime = performance.now();
+      let frameCount = 0;
+      let fps = 60;
+      let averageFPS = 60;
+      let fpsHistory = [];
+      let deviceTier = 'high'; // low, medium, high
+      
+      // デバイス性能の判定
+      function detectDevicePerformance() {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        
+        if (!gl) {
+          return 'low';
+        }
+        
+        const cores = navigator.hardwareConcurrency || 4;
+        const memory = navigator.deviceMemory || 4;
+        const isMobile = /mobile|android|iphone|ipad/i.test(navigator.userAgent);
+        
+        // 簡単な性能判定アルゴリズム
+        let performanceScore = 0;
+        performanceScore += cores * 10;
+        performanceScore += memory * 5;
+        
+        if (isMobile) {
+          performanceScore *= 0.6; // モバイル補正
+        }
+        
+        if (performanceScore > 80) return 'high';
+        if (performanceScore > 40) return 'medium';
+        return 'low';
+      }
+      
+      function monitorPerformance() {
+        const now = performance.now();
+        frameCount++;
+        
+        if (now - lastFrameTime >= 1000) {
+          const currentFPS = Math.round((frameCount * 1000) / (now - lastFrameTime));
+          fpsHistory.push(currentFPS);
+          
+          if (fpsHistory.length > 10) {
+            fpsHistory.shift();
+          }
+          
+          // 平均FPSを計算
+          averageFPS = fpsHistory.reduce((a, b) => a + b, 0) / fpsHistory.length;
+          fps = currentFPS;
+          
+          frameCount = 0;
+          lastFrameTime = now;
+          
+          // 動的パフォーマンス最適化
+          applyPerformanceOptimizations();
+        }
+        
+        requestAnimationFrame(monitorPerformance);
+      }
+      
+      function applyPerformanceOptimizations() {
+        const body = document.body;
+        
+        // パフォーマンスレベルを判定
+        if (averageFPS < 20) {
+          body.classList.add('performance-mode', 'low-performance');
+          body.classList.remove('medium-performance');
+          deviceTier = 'low';
+        } else if (averageFPS < 40) {
+          body.classList.add('performance-mode', 'medium-performance');
+          body.classList.remove('low-performance');
+          deviceTier = 'medium';
+        } else {
+          body.classList.remove('performance-mode', 'low-performance', 'medium-performance');
+          deviceTier = 'high';
+        }
+        
+        // デバイス階層別の最適化適用
+        optimizeForDeviceTier(deviceTier);
+      }
+      
+      function optimizeForDeviceTier(tier) {
+        switch(tier) {
+          case 'low':
+            // 低性能デバイス: 最小限のエフェクトとプールサイズ縮小
+            if (digitElementPool.length > 5) {
+              digitElementPool.length = 5;
+            }
+            // アニメーション間隔を調整
+            isReducedMotion = true;
+            break;
+            
+          case 'medium':
+            // 中性能デバイス: 適度な制限
+            if (digitElementPool.length > 15) {
+              digitElementPool.length = 15;
+            }
+            break;
+            
+          case 'high':
+            // 高性能デバイス: フル機能
+            isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            break;
+        }
+      }
+      
+      // 初期デバイス性能判定
+      deviceTier = detectDevicePerformance();
+      optimizeForDeviceTier(deviceTier);
+      
+      // パフォーマンス監視開始
+      requestAnimationFrame(monitorPerformance);
+      
+      // 動的will-change制御システム
+      const willChangeController = {
+        activeElements: new WeakSet(),
+        
+        enable(element, properties = 'transform') {
+          if (!this.activeElements.has(element)) {
+            element.style.willChange = properties;
+            this.activeElements.add(element);
+          }
+        },
+        
+        disable(element) {
+          if (this.activeElements.has(element)) {
+            element.style.willChange = 'auto';
+            this.activeElements.delete(element);
+          }
+        },
+        
+        // アニメーション完了時に自動的にwill-changeを無効化
+        enableTemporary(element, properties = 'transform', duration = 1000) {
+          this.enable(element, properties);
+          setTimeout(() => this.disable(element), duration);
+        }
+      };
+      
+      // メモリリーク防止のためのイベントリスナー管理システム
+      const eventListenerManager = {
+        listeners: new Map(),
+        
+        add(element, event, handler, options = {}) {
+          const key = `${element.tagName}-${event}-${Date.now()}-${Math.random()}`;
+          element.addEventListener(event, handler, options);
+          
+          this.listeners.set(key, {
+            element: element,
+            event: event,
+            handler: handler,
+            options: options
+          });
+          
+          return key;
+        },
+        
+        remove(key) {
+          const listener = this.listeners.get(key);
+          if (listener) {
+            listener.element.removeEventListener(listener.event, listener.handler, listener.options);
+            this.listeners.delete(key);
+          }
+        },
+        
+        removeAll() {
+          this.listeners.forEach((listener, key) => {
+            listener.element.removeEventListener(listener.event, listener.handler, listener.options);
+          });
+          this.listeners.clear();
+        },
+        
+        // 要素が削除された際の自動クリーンアップ
+        cleanupForElement(element) {
+          const toRemove = [];
+          this.listeners.forEach((listener, key) => {
+            if (listener.element === element || !listener.element.isConnected) {
+              toRemove.push(key);
+            }
+          });
+          toRemove.forEach(key => this.remove(key));
+        }
+      };
+      
+      // オブジェクトプール: DOM要素の再利用
+      const digitElementPool = [];
+      const maxPoolSize = 20;
+      
+      function getDigitElement() {
+        if (digitElementPool.length > 0) {
+          return digitElementPool.pop();
+        }
+        
+        const container = document.createElement('span');
+        container.className = 'digit-container';
+        const digitSpan = document.createElement('span');
+        digitSpan.className = 'digit';
+        container.appendChild(digitSpan);
+        return container;
+      }
+      
+      function returnDigitElement(element) {
+        if (digitElementPool.length < maxPoolSize) {
+          // スタイルとクラスをクリア
+          element.style.cssText = '';
+          element.classList.remove('animating');
+          const digitSpan = element.querySelector('.digit');
+          if (digitSpan) {
+            digitSpan.classList.remove('flipping-out', 'flipping-in', 'new-digit');
+          }
+          
+          // will-changeを無効化
+          willChangeController.disable(element);
+          willChangeController.disable(digitSpan);
+          
+          // イベントリスナーをクリーンアップ
+          eventListenerManager.cleanupForElement(element);
+          
+          digitElementPool.push(element);
+        }
       }
       
       function createDigitElements(digitStr) {
-        return digitStr.split('').map(digit => {
-          const container = document.createElement('span');
-          container.className = 'digit-container';
-          const digitSpan = document.createElement('span');
-          digitSpan.className = 'digit';
+        return digitStr.split('').map((digit, index) => {
+          const container = getDigitElement();
+          container.dataset.digitIndex = index;
+          
+          const digitSpan = container.querySelector('.digit');
           digitSpan.textContent = digit;
-          container.appendChild(digitSpan);
+          digitSpan.setAttribute('data-digit', digit);
+          
           return container;
         });
       }
       
-      function animateDigitChange(container, newDigit) {
+      // 高度な桁別アニメーション制御
+      function animateDigitChange(container, newDigit, index, totalDigits) {
         const digitSpan = container.querySelector('.digit');
-        digitSpan.classList.add('flipping');
+        const cascadeDelay = (totalDigits - 1 - index) * 50; // 右から左へのカスケード効果
         
-        setTimeout(() => {
-          digitSpan.textContent = newDigit;
-          digitSpan.classList.remove('flipping');
-          digitSpan.classList.add('new-digit');
-          
+        // アニメーション開始前にwill-changeを有効化
+        willChangeController.enable(container, 'transform, opacity');
+        willChangeController.enable(digitSpan, 'transform, opacity, filter');
+        
+        // アニメーション中クラスを追加
+        container.classList.add('animating');
+        
+        // パフォーマンス最適化されたアニメーション
+        scheduleAnimation(container, () => {
+          // フリップアウトアニメーション
           setTimeout(() => {
-            digitSpan.classList.remove('new-digit');
-          }, 600);
-        }, 300);
+            digitSpan.classList.add('flipping-out');
+            
+            // 中間でテキストを変更
+            setTimeout(() => {
+              digitSpan.textContent = newDigit;
+              digitSpan.setAttribute('data-digit', newDigit);
+              digitSpan.classList.remove('flipping-out');
+              digitSpan.classList.add('flipping-in');
+              
+              // フリップインアニメーション
+              setTimeout(() => {
+                digitSpan.classList.remove('flipping-in');
+                digitSpan.classList.add('new-digit');
+                
+                // 完了処理とwill-changeクリーンアップ
+                setTimeout(() => {
+                  digitSpan.classList.remove('new-digit');
+                  container.classList.remove('animating');
+                  
+                  // アニメーション完了後にwill-changeを無効化
+                  willChangeController.disable(container);
+                  willChangeController.disable(digitSpan);
+                }, 600);
+              }, 50);
+            }, 400);
+          }, cascadeDelay);
+        });
+      }
+      
+      // 強化された3D効果とインタラクティブ機能
+      function enhance3DEffects() {
+        const containers = document.querySelectorAll('.digit-container');
+        containers.forEach((container, index) => {
+          const digitSpan = container.querySelector('.digit');
+          
+          // マウスホバー時の強化された3D効果
+          container.addEventListener('mouseenter', () => {
+            if (!container.classList.contains('animating') && !isReducedMotion) {
+              digitSpan.style.transform = 'rotateY(15deg) scale(1.05) translateZ(10px)';
+              digitSpan.style.textShadow = '0 0 30px rgba(255, 215, 0, 1), 0 0 60px rgba(255, 165, 0, 0.8)';
+              container.style.zIndex = '10';
+              
+              // 微細なパーティクル効果
+              createHoverParticles(container);
+            }
+          });
+          
+          container.addEventListener('mouseleave', () => {
+            if (!container.classList.contains('animating')) {
+              digitSpan.style.transform = '';
+              digitSpan.style.textShadow = '';
+              container.style.zIndex = '';
+            }
+          });
+          
+          // タッチデバイス対応
+          container.addEventListener('touchstart', () => {
+            if (!isReducedMotion) {
+              digitSpan.style.transform = 'scale(1.1)';
+              digitSpan.style.filter = 'brightness(1.2)';
+            }
+          });
+          
+          container.addEventListener('touchend', () => {
+            digitSpan.style.transform = '';
+            digitSpan.style.filter = '';
+          });
+        });
       }
 
       function updateLanguageDisplay() {
         const lang = languages[currentLang];
-        document.querySelector('.label-top').textContent = lang.top;
-        document.querySelector('.label-bottom').textContent = lang.bottom;
-        document.getElementById('langText').textContent = lang.lang_select;
-        document.getElementById('musicText').textContent = lang.music;
+        if (!lang) {
+          console.error('Language not found:', currentLang);
+          return;
+        }
+        
+        // Null チェックを追加
+        const labelTop = document.querySelector('.label-top');
+        const labelBottom = document.querySelector('.label-bottom');
+        const langText = document.getElementById('langText');
+        const langIcon = document.getElementById('langIcon');
+        const musicText = document.getElementById('musicText');
+        
+        if (labelTop) labelTop.textContent = lang.top;
+        if (labelBottom) labelBottom.textContent = lang.bottom;
+        if (langText) langText.textContent = lang.lang_select;
+        if (langIcon) langIcon.textContent = lang.flag;
+        if (musicText) musicText.textContent = lang.music;
+        
+        // HTMLのlang属性も更新
+        document.documentElement.lang = currentLang;
       }
+      
+      // 最適化されたrender関数
+      let lastRenderedSeconds = null;
+      let renderBatch = [];
       
       function render() {
         const now = Date.now();
         const diffMs = Math.max(0, targetMs - now);
         const secs = Math.floor(diffMs / 1000);
+        
+        // 不要な再描画を防ぐ
+        if (secs === lastRenderedSeconds) {
+          return;
+        }
+        
         const localizedSecs = toCurrentLanguageDigits(secs);
         
         if (previousSeconds !== null && previousSeconds !== secs) {
           addTransitionEffect();
           
-          // 各桁のアニメーション
-          const currentDigits = el.querySelectorAll('.digit-container');
+          // DOM操作をバッチ処理
+          const currentDigits = el.children;
           const newDigits = localizedSecs.split('');
           
           if (currentDigits.length === newDigits.length) {
+            // 変更された桁のみアニメーション（最適化版）
+            const previousDigits = String(previousSeconds)
+              .split('')
+              .map(d => languages[currentLang].digits[d] || d);
+            
+            renderBatch.length = 0; // 配列をクリア
+            
             newDigits.forEach((digit, index) => {
-              if (currentDigits[index]) {
-                animateDigitChange(currentDigits[index], digit);
+              if (currentDigits[index] && previousDigits[index] !== digit) {
+                renderBatch.push({
+                  container: currentDigits[index],
+                  digit: digit,
+                  index: index,
+                  total: newDigits.length
+                });
               }
             });
+            
+            // バッチ処理でアニメーション実行
+            if (renderBatch.length > 0) {
+              requestAnimationFrame(() => {
+                renderBatch.forEach(item => {
+                  animateDigitChange(item.container, item.digit, item.index, item.total);
+                });
+              });
+            }
           } else {
-            // 桁数が変わった場合は全体を再構築
-            el.innerHTML = '';
-            const digitElements = createDigitElements(localizedSecs);
-            digitElements.forEach(element => el.appendChild(element));
+            // 桁数変更時の最適化された再構築
+            requestAnimationFrame(() => {
+              el.style.opacity = '0.3';
+              el.style.transform = 'scale(0.95)';
+              
+              setTimeout(() => {
+                // 古い要素をプールに戻す
+                Array.from(el.children).forEach(child => {
+                  returnDigitElement(child);
+                });
+                
+                el.innerHTML = '';
+                const digitElements = createDigitElements(localizedSecs);
+                const fragment = document.createDocumentFragment();
+                digitElements.forEach(element => fragment.appendChild(element));
+                el.appendChild(fragment);
+                
+                el.style.opacity = '1';
+                el.style.transform = 'scale(1)';
+                
+                setTimeout(() => enhance3DEffects(), 100);
+              }, 300);
+            });
           }
         } else if (previousSeconds === null) {
-          // 初回表示
-          el.innerHTML = '';
-          const digitElements = createDigitElements(localizedSecs);
-          digitElements.forEach(element => el.appendChild(element));
+          // 初回表示の最適化
+          requestAnimationFrame(() => {
+            el.innerHTML = '';
+            const digitElements = createDigitElements(localizedSecs);
+            const fragment = document.createDocumentFragment();
+            
+            digitElements.forEach((element, index) => {
+              element.style.opacity = '0';
+              element.style.transform = 'translateY(30px) rotateX(90deg)';
+              fragment.appendChild(element);
+              
+              setTimeout(() => {
+                element.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0) rotateX(0deg)';
+              }, index * 100);
+            });
+            
+            el.appendChild(fragment);
+            
+            // 3D効果を適用
+            setTimeout(() => enhance3DEffects(), 1000);
+          });
         }
         
         previousSeconds = secs;
+        lastRenderedSeconds = secs; // 最適化: レンダリングフラグ更新
         
         if (diffMs === 0) {
           clearInterval(timer);
           // カウントダウン終了時の特別エフェクト
-          el.style.animation = 'glow 0.5s ease-in-out infinite alternate, party 2s ease-in-out infinite';
+          requestAnimationFrame(() => {
+            triggerCountdownFinishEffect();
+          });
         }
+      }
+      
+      // カウントダウン終了時の壮大なエフェクト
+      function triggerCountdownFinishEffect() {
+        // メインエフェクト
+        el.style.animation = 'glow 0.3s ease-in-out infinite alternate, party 1.5s ease-in-out infinite';
+        
+        // 各桁に個別の爆発エフェクト
+        const containers = el.querySelectorAll('.digit-container');
+        containers.forEach((container, index) => {
+          setTimeout(() => {
+            container.style.animation = 'digitExplosion 2s ease-out infinite';
+            
+            // パーティクルエフェクト
+            createParticleExplosion(container);
+          }, index * 200);
+        });
+        
+        // 背景の色彩変化
+        document.body.style.animation = 'finalCountdown 3s ease-in-out infinite';
+        
+        // 音楽が再生中の場合、特別な終了メロディーを追加
+        if (isPlaying && instrumentSynth) {
+          playVictoryMelody();
+        }
+      }
+      
+      // パーティクル爆発エフェクト
+      function createParticleExplosion(centerElement) {
+        const rect = centerElement.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        const particles = ['✨', '🎉', '🎊', '💫', '⭐', '🌟'];
+        const colors = ['#ffd700', '#ff69b4', '#ff6347', '#00ffff', '#98fb98'];
+        
+        for (let i = 0; i < 12; i++) {
+          const particle = document.createElement('div');
+          particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+          particle.style.cssText = `
+            position: fixed;
+            left: ${centerX}px;
+            top: ${centerY}px;
+            font-size: 20px;
+            pointer-events: none;
+            z-index: 1000;
+            color: ${colors[Math.floor(Math.random() * colors.length)]};
+            animation: particleExplode 2s ease-out forwards;
+            animation-delay: ${Math.random() * 0.5}s;
+          `;
+          
+          const angle = (i / 12) * Math.PI * 2;
+          const distance = 100 + Math.random() * 100;
+          const endX = centerX + Math.cos(angle) * distance;
+          const endY = centerY + Math.sin(angle) * distance - 50;
+          
+          particle.style.setProperty('--end-x', endX + 'px');
+          particle.style.setProperty('--end-y', endY + 'px');
+          
+          document.body.appendChild(particle);
+          
+          setTimeout(() => {
+            if (particle.parentNode) {
+              particle.parentNode.removeChild(particle);
+            }
+          }, 2500);
+        }
+      }
+      
+      // 勝利メロディーの演奏
+      function playVictoryMelody() {
+        if (!audioContext || !instrumentSynth) return;
+        
+        // 勝利のメロディーパターン（ラーガベースの祝祭音楽）
+        const victoryMelody = [
+          { note: 0, time: 0, duration: 0.5 },    // Sa
+          { note: 2, time: 0.3, duration: 0.5 },  // Ga
+          { note: 4, time: 0.6, duration: 0.5 },  // Pa
+          { note: 7, time: 0.9, duration: 1.0 },  // Sa (高)
+          { note: 4, time: 1.5, duration: 0.5 },  // Pa
+          { note: 2, time: 1.8, duration: 0.5 },  // Ga
+          { note: 0, time: 2.1, duration: 1.5 },  // Sa (長)
+        ];
+        
+        const startTime = audioContext.currentTime;
+        
+        victoryMelody.forEach(({ note, time, duration }) => {
+          const frequency = ragaYaman.frequencies[note] * (note === 7 ? 2 : 1); // オクターブ調整
+          instrumentSynth.createSitarSound(frequency, duration, startTime + time);
+        });
+      }
       }
 
       // 音楽関連の設定
-      const bgMusic = document.getElementById('bgMusic');
       const musicControl = document.getElementById('musicControl');
       const volumeControl = document.getElementById('volumeControl');
       const volumeSlider = document.getElementById('volumeSlider');
@@ -959,88 +1919,447 @@
       let isPlaying = false;
       let showingVolumeControl = false;
       
-      // インドの伝統音楽のWeb Audio API版（フォールバック）
+      // 高品質インド音楽生成システム
       let audioContext;
-      let oscillator;
-      let gainNode;
+      let masterGain;
+      let melodyGain;
+      let droneGain;
+      let tablaGain;
       
-      function createIndianMusic() {
-        try {
-          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      // ラーガ「ヤマン」の音階（インドクラシック音楽）
+      const ragaYaman = {
+        // Sa Re Ga Ma Pa Dha Ni Sa（ドレミファソラシド相当）
+        frequencies: [261.63, 293.66, 329.63, 369.99, 392.00, 440.00, 493.88, 523.25],
+        name: 'ヤマン',
+        mood: '夜の静けさと瞑想'
+      };
+      
+      // インドの楽器サウンド生成
+      class IndianInstrumentSynthesizer {
+        constructor(context, gain) {
+          this.context = context;
+          this.masterGain = gain;
+          this.activeOscillators = new Set();
           
-          // ラーガのような音階を生成
-          const frequencies = [261.63, 293.66, 311.13, 349.23, 392.00, 415.30, 466.16, 523.25]; // C Indian scale
-          let currentFreqIndex = 0;
+          // オーディオノードプールシステム
+          this.nodePool = {
+            oscillators: [],
+            gainNodes: [],
+            filters: [],
+            maxPoolSize: 10
+          };
           
-          function playNote() {
-            if (oscillator) {
-              oscillator.stop();
+          // プール初期化
+          this.initializePool();
+        }
+        
+        initializePool() {
+          // オーディオノードを事前に作成してプールに保存
+          for (let i = 0; i < this.nodePool.maxPoolSize; i++) {
+            this.nodePool.oscillators.push(this.context.createOscillator());
+            this.nodePool.gainNodes.push(this.context.createGain());
+            this.nodePool.filters.push(this.context.createBiquadFilter());
+          }
+        }
+        
+        getPooledOscillator() {
+          if (this.nodePool.oscillators.length > 0) {
+            return this.nodePool.oscillators.pop();
+          }
+          return this.context.createOscillator();
+        }
+        
+        getPooledGainNode() {
+          if (this.nodePool.gainNodes.length > 0) {
+            return this.nodePool.gainNodes.pop();
+          }
+          return this.context.createGain();
+        }
+        
+        getPooledFilter() {
+          if (this.nodePool.filters.length > 0) {
+            return this.nodePool.filters.pop();
+          }
+          return this.context.createBiquadFilter();
+        }
+        
+        returnToPool(oscillator, gainNode, filter) {
+          // ノードをリセットしてプールに戻す（実際の実装では制限あり）
+          try {
+            oscillator.stop(0);
+            oscillator.disconnect();
+            
+            if (this.nodePool.oscillators.length < this.nodePool.maxPoolSize) {
+              oscillator = this.context.createOscillator(); // 新しいインスタンスが必要
+              this.nodePool.oscillators.push(oscillator);
             }
             
-            oscillator = audioContext.createOscillator();
-            gainNode = audioContext.createGain();
+            if (gainNode && this.nodePool.gainNodes.length < this.nodePool.maxPoolSize) {
+              gainNode.disconnect();
+              gainNode.gain.value = 1;
+              this.nodePool.gainNodes.push(gainNode);
+            }
+            
+            if (filter && this.nodePool.filters.length < this.nodePool.maxPoolSize) {
+              filter.disconnect();
+              filter.frequency.value = 350;
+              filter.Q.value = 1;
+              this.nodePool.filters.push(filter);
+            }
+          } catch (e) {
+            // オシレータはstop後に再利用できないため、新しいものを作成
+          }
+        }
+        
+        // シタール風の音色生成（最適化版）
+        createSitarSound(frequency, duration, startTime) {
+          const oscillator = this.getPooledOscillator();
+          const gainNode = this.getPooledGainNode();
+          const filter = this.getPooledFilter();
+          
+          // シタール特有の音色設定
+          oscillator.type = 'sawtooth';
+          oscillator.frequency.setValueAtTime(frequency, startTime);
+          
+          // 微細な音程変化でシタールの特徴を再現
+          oscillator.frequency.exponentialRampToValueAtTime(
+            frequency * 1.05, startTime + 0.1
+          );
+          oscillator.frequency.exponentialRampToValueAtTime(
+            frequency, startTime + 0.3
+          );
+          
+          // フィルター設定
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(1200, startTime);
+          filter.Q.setValueAtTime(8, startTime);
+          
+          // エンベロープ設定
+          gainNode.gain.setValueAtTime(0, startTime);
+          gainNode.gain.linearRampToValueAtTime(0.15 * volumeSlider.value, startTime + 0.05);
+          gainNode.gain.exponentialRampToValueAtTime(0.08 * volumeSlider.value, startTime + 0.3);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+          
+          // 接続
+          oscillator.connect(filter);
+          filter.connect(gainNode);
+          gainNode.connect(this.masterGain);
+          
+          oscillator.start(startTime);
+          oscillator.stop(startTime + duration);
+          
+          this.activeOscillators.add(oscillator);
+          oscillator.onended = () => {
+            this.activeOscillators.delete(oscillator);
+            // 使用済みノードをプールに戻す（新しいオシレータが必要）
+            setTimeout(() => {
+              this.returnToPool(oscillator, gainNode, filter);
+            }, 100);
+          };
+          
+          return oscillator;
+        }
+        
+        // タンプーラ（ドローン）生成
+        createTanpuraSound() {
+          const fundamentals = [ragaYaman.frequencies[0], ragaYaman.frequencies[4]]; // Sa, Pa
+          
+          fundamentals.forEach(freq => {
+            const oscillator = this.context.createOscillator();
+            const gainNode = this.context.createGain();
+            
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(freq, this.context.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.08 * volumeSlider.value, this.context.currentTime);
             
             oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+            gainNode.connect(droneGain);
             
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(frequencies[currentFreqIndex], audioContext.currentTime);
+            oscillator.start();
+            this.activeOscillators.add(oscillator);
             
-            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.1 * volumeSlider.value, audioContext.currentTime + 0.1);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 2);
-            
-            currentFreqIndex = (currentFreqIndex + 1) % frequencies.length;
-            
-            if (isPlaying) {
-              setTimeout(playNote, 1500 + Math.random() * 1000);
-            }
-          }
+            // 音程を微調整してタンプーラの響きを再現
+            setInterval(() => {
+              if (this.activeOscillators.has(oscillator) && isPlaying) {
+                const variation = 1 + (Math.sin(Date.now() / 5000) * 0.002);
+                oscillator.frequency.setValueAtTime(
+                  freq * variation, this.context.currentTime
+                );
+              }
+            }, 100);
+          });
+        }
+        
+        // タブラ風パーカッション
+        createTablaSound(startTime) {
+          // ドラム音の生成
+          const oscillator = this.context.createOscillator();
+          const gainNode = this.context.createGain();
+          const filter = this.context.createBiquadFilter();
           
-          if (isPlaying) {
-            playNote();
-          }
-        } catch (e) {
-          console.log('Web Audio APIが利用できません');
+          oscillator.type = 'sine';
+          oscillator.frequency.setValueAtTime(80, startTime);
+          oscillator.frequency.exponentialRampToValueAtTime(40, startTime + 0.1);
+          
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(300, startTime);
+          
+          gainNode.gain.setValueAtTime(0.3 * volumeSlider.value, startTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+          
+          oscillator.connect(filter);
+          filter.connect(gainNode);
+          gainNode.connect(tablaGain);
+          
+          oscillator.start(startTime);
+          oscillator.stop(startTime + 0.3);
+          
+          this.activeOscillators.add(oscillator);
+          oscillator.onended = () => this.activeOscillators.delete(oscillator);
+        }
+        
+        stopAll() {
+          this.activeOscillators.forEach(osc => {
+            try {
+              osc.stop();
+            } catch (e) {
+              // 既に停止している場合のエラーを無視
+            }
+          });
+          this.activeOscillators.clear();
         }
       }
       
-      function toggleMusic() {
+      let instrumentSynth;
+      let melodyInterval;
+      let tablaInterval;
+      let currentMelodyIndex = 0;
+      
+      // メロディーパターン（ラーガヤマンの典型的フレーズ）
+      const melodyPatterns = [
+        [0, 2, 4, 2, 0], // Sa Ga Pa Ga Sa
+        [4, 5, 6, 5, 4], // Pa Dha Ni Dha Pa
+        [2, 4, 6, 7, 6, 4, 2], // Ga Pa Ni Sa Ni Pa Ga
+        [0, 1, 2, 1, 0], // Sa Re Ga Re Sa
+      ];
+      
+      // タブラのリズムパターン
+      const tablaPatterns = [
+        [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5], // 基本的な8ビート
+        [0, 0.75, 1.5, 2.25, 3], // 複雑なリズム
+      ];
+      
+      async function initializeAudioSystem() {
+        try {
+          // AudioContextを初期化
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
+          if (!AudioContextClass) {
+            throw new Error('Web Audio API is not supported in this browser');
+          }
+          audioContext = new AudioContextClass();
+          
+          // ユーザーインタラクション後にAudioContextを再開
+          if (audioContext.state === 'suspended') {
+            try {
+              await audioContext.resume();
+            } catch (error) {
+              console.warn('AudioContext resume failed:', error);
+            }
+          }
+          
+          // ゲインノード設定
+          masterGain = audioContext.createGain();
+          melodyGain = audioContext.createGain();
+          droneGain = audioContext.createGain();
+          tablaGain = audioContext.createGain();
+          
+          masterGain.gain.setValueAtTime(0.7, audioContext.currentTime);
+          melodyGain.gain.setValueAtTime(0.8, audioContext.currentTime);
+          droneGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+          tablaGain.gain.setValueAtTime(0.6, audioContext.currentTime);
+          
+          // 接続
+          melodyGain.connect(masterGain);
+          droneGain.connect(masterGain);
+          tablaGain.connect(masterGain);
+          masterGain.connect(audioContext.destination);
+          
+          // シンセサイザーを初期化
+          instrumentSynth = new IndianInstrumentSynthesizer(audioContext, melodyGain);
+          
+          return true;
+        } catch (error) {
+          console.error('音楽システムの初期化に失敗:', error);
+          return false;
+        }
+      }
+      
+      function startIndianMusic() {
+        if (!audioContext || !instrumentSynth) return;
+        
+        // タンプーラ（ドローン）開始
+        instrumentSynth.createTanpuraSound();
+        
+        // メロディー演奏
+        let patternIndex = 0;
+        melodyInterval = setInterval(() => {
+          if (!isPlaying) return;
+          
+          const pattern = melodyPatterns[patternIndex % melodyPatterns.length];
+          const startTime = audioContext.currentTime;
+          
+          pattern.forEach((noteIndex, i) => {
+            const frequency = ragaYaman.frequencies[noteIndex];
+            const noteStartTime = startTime + (i * 0.8);
+            const duration = 1.2;
+            
+            instrumentSynth.createSitarSound(frequency, duration, noteStartTime);
+          });
+          
+          patternIndex++;
+        }, 4000); // 4秒間隔でメロディーパターンを変更
+        
+        // タブラ演奏
+        let tablaPatternIndex = 0;
+        tablaInterval = setInterval(() => {
+          if (!isPlaying) return;
+          
+          const pattern = tablaPatterns[tablaPatternIndex % tablaPatterns.length];
+          const startTime = audioContext.currentTime;
+          
+          pattern.forEach(timing => {
+            instrumentSynth.createTablaSound(startTime + timing);
+          });
+          
+          tablaPatternIndex++;
+        }, 4000); // タブラも4秒間隔
+      }
+      
+      function stopIndianMusic() {
+        if (instrumentSynth) {
+          instrumentSynth.stopAll();
+        }
+        
+        if (melodyInterval) {
+          clearInterval(melodyInterval);
+          melodyInterval = null;
+        }
+        
+        if (tablaInterval) {
+          clearInterval(tablaInterval);
+          tablaInterval = null;
+        }
+      }
+      
+      async function toggleMusic() {
+        // 既に処理中の場合は無視
+        if (musicControl.classList.contains('loading')) {
+          return;
+        }
+        
         isPlaying = !isPlaying;
         
         if (isPlaying) {
-          // まず通常の音声ファイルを試す
-          bgMusic.volume = volumeSlider.value;
-          const playPromise = bgMusic.play();
-          
-          if (playPromise !== undefined) {
-            playPromise.then(() => {
+          try {
+            // ローディング状態に設定
+            musicControl.classList.add('loading');
+            musicIcon.textContent = '⏳';
+            musicText.textContent = '音楽システム初期化中...';
+            
+            // AudioContextの初期化
+            const initialized = await initializeAudioSystem();
+            
+            if (initialized) {
+              startIndianMusic();
               musicIcon.textContent = '🎼';
-              musicText.textContent = 'संगीत चल रहा है';
+              const lang = languages[currentLang];
+              musicText.textContent = lang.music + ' (プレミアム)';
+              musicControl.classList.remove('loading');
               musicControl.classList.add('playing');
               createFloatingNotes();
-            }).catch(() => {
-              // フォールバック: Web Audio APIで音楽生成
-              createIndianMusic();
-              musicIcon.textContent = '🎶';
-              musicText.textContent = 'सिंथेटिक संगीत';
-              musicControl.classList.add('playing');
-              createFloatingNotes();
-            });
+              
+              // 成功メッセージを一時表示
+              showMusicStatus('🎵 音楽開始 - ラーガヤマン演奏中', 'success');
+            } else {
+              throw new Error('音楽システムの初期化に失敗');
+            }
+          } catch (error) {
+            console.error('音楽再生エラー:', error);
+            isPlaying = false;
+            musicControl.classList.remove('loading');
+            musicControl.classList.add('error');
+            musicIcon.textContent = '❌';
+            musicText.textContent = '音楽エラー';
+            
+            showMusicStatus('🚫 音楽再生に失敗しました\nブラウザの設定を確認してください', 'error');
+            
+            // エラー状態を3秒後にリセット
+            setTimeout(() => {
+              musicControl.classList.remove('error');
+              musicIcon.textContent = '🎵';
+              const lang = languages[currentLang];
+              musicText.textContent = lang.music;
+            }, 3000);
           }
         } else {
-          bgMusic.pause();
-          if (oscillator) {
-            oscillator.stop();
-          }
+          stopIndianMusic();
           musicIcon.textContent = '🎵';
-          musicText.textContent = 'भारतीय संगीत';
-          musicControl.classList.remove('playing');
+          const lang = languages[currentLang];
+          musicText.textContent = lang.music;
+          musicControl.classList.remove('playing', 'loading', 'error');
           clearInterval(noteInterval);
+          
+          showMusicStatus('🔇 音楽停止', 'info');
         }
+      }
+      
+      // 音楽ステータス表示機能
+      function showMusicStatus(message, type) {
+        const statusDiv = document.createElement('div');
+        statusDiv.textContent = message;
+        statusDiv.style.cssText = `
+          position: fixed;
+          top: 120px;
+          right: 20px;
+          padding: 10px 15px;
+          border-radius: 25px;
+          color: white;
+          font-size: 12px;
+          z-index: 1001;
+          backdrop-filter: blur(10px);
+          animation: fadeInDown 0.3s ease-out;
+          max-width: 250px;
+          text-align: center;
+        `;
+        
+        // タイプ別のスタイル
+        switch (type) {
+          case 'success':
+            statusDiv.style.background = 'rgba(34, 197, 94, 0.8)';
+            statusDiv.style.border = '2px solid rgba(34, 197, 94, 0.6)';
+            break;
+          case 'error':
+            statusDiv.style.background = 'rgba(239, 68, 68, 0.8)';
+            statusDiv.style.border = '2px solid rgba(239, 68, 68, 0.6)';
+            break;
+          case 'info':
+            statusDiv.style.background = 'rgba(59, 130, 246, 0.8)';
+            statusDiv.style.border = '2px solid rgba(59, 130, 246, 0.6)';
+            break;
+        }
+        
+        document.body.appendChild(statusDiv);
+        
+        // 3秒後に自動削除
+        setTimeout(() => {
+          if (statusDiv.parentNode) {
+            statusDiv.style.animation = 'fadeOutUp 0.3s ease-out';
+            setTimeout(() => {
+              statusDiv.parentNode.removeChild(statusDiv);
+            }, 300);
+          }
+        }, 3000);
       }
       
       let noteInterval;
@@ -1076,16 +2395,69 @@
       }
       
       musicControl.addEventListener('click', toggleMusic);
+      
+      // 右クリック、長押しでボリュームコントロール表示
       musicControl.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         toggleVolumeControl();
       });
       
+      // モバイル対応: 長押しでボリュームコントロール
+      let longPressTimer;
+      musicControl.addEventListener('touchstart', (e) => {
+        longPressTimer = setTimeout(() => {
+          e.preventDefault();
+          toggleVolumeControl();
+          // 軽い振動フィードバック（対応ブラウザのみ）
+          if (navigator.vibrate) {
+            navigator.vibrate(50);
+          }
+        }, 500);
+      });
+      
+      musicControl.addEventListener('touchend', () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+        }
+      });
+      
+      musicControl.addEventListener('touchmove', () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+        }
+      });
+      
+      // ボリュームコントロール改善
+      const volumeValue = document.getElementById('volumeValue');
+      
       volumeSlider.addEventListener('input', (e) => {
-        const volume = e.target.value;
-        bgMusic.volume = volume;
-        if (gainNode) {
-          gainNode.gain.value = 0.1 * volume;
+        const volume = parseFloat(e.target.value);
+        
+        // ボリューム値の表示更新
+        volumeValue.textContent = Math.round(volume * 100) + '%';
+        
+        // マスターボリューム調整
+        if (masterGain) {
+          masterGain.gain.setValueAtTime(0.7 * volume, audioContext.currentTime);
+        }
+        
+        // 現在再生中の音量も即座に調整
+        if (melodyGain) {
+          melodyGain.gain.setValueAtTime(0.8 * volume, audioContext.currentTime);
+        }
+        if (droneGain) {
+          droneGain.gain.setValueAtTime(0.3 * volume, audioContext.currentTime);
+        }
+        if (tablaGain) {
+          tablaGain.gain.setValueAtTime(0.6 * volume, audioContext.currentTime);
+        }
+      });
+      
+      // ボリュームスライダーのリアルタイム視覚的フィードバック
+      volumeSlider.addEventListener('mousemove', (e) => {
+        if (e.buttons === 1) { // ドラッグ中のみ
+          const volume = parseFloat(e.target.value);
+          showMusicStatus(`🔊 音量: ${Math.round(volume * 100)}%`, 'info');
         }
       });
       
@@ -1155,13 +2527,100 @@
         }
       });
       
-      // ページロード時に音楽を自動開始（ユーザーインタラクション後）
-      document.addEventListener('click', function autoStart() {
+      // ブラウザ自動再生ポリシーに対応したスマートな音楽開始
+      let userHasInteracted = false;
+      
+      function handleFirstUserInteraction() {
+        userHasInteracted = true;
+        
+        // ユーザーに音楽再生の許可を求めるインジケーターを表示
         if (!isPlaying) {
-          toggleMusic();
+          showMusicPrompt();
         }
-        document.removeEventListener('click', autoStart);
-      }, { once: true });
+      }
+      
+      function showMusicPrompt() {
+        const promptDiv = document.createElement('div');
+        promptDiv.innerHTML = `
+          <div style="
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid rgba(255, 215, 0, 0.8);
+            border-radius: 20px;
+            padding: 25px 30px;
+            text-align: center;
+            color: #e5e7eb;
+            backdrop-filter: blur(15px);
+            z-index: 1002;
+            max-width: 350px;
+            animation: fadeInDown 0.5s ease-out;
+          ">
+            <div style="font-size: 24px; margin-bottom: 15px;">🎵</div>
+            <div style="font-size: 16px; margin-bottom: 20px; line-height: 1.4;">美しいインド古典音楽でカウントダウンをお楽しみください</div>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+              <button id="playMusicBtn" style="
+                background: rgba(34, 197, 94, 0.8);
+                border: 2px solid rgba(34, 197, 94, 0.6);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.3s ease;
+              ">🎼 再生する</button>
+              <button id="skipMusicBtn" style="
+                background: rgba(75, 85, 99, 0.8);
+                border: 2px solid rgba(75, 85, 99, 0.6);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.3s ease;
+              ">無音で続行</button>
+            </div>
+            <div style="font-size: 12px; margin-top: 15px; opacity: 0.7;">スペース/Mキーでいつでも切り替え可能 | Hキーでヘルプ</div>
+          </div>
+        `;
+        
+        document.body.appendChild(promptDiv);
+        
+        // ボタンイベント設定
+        document.getElementById('playMusicBtn').addEventListener('click', () => {
+          document.body.removeChild(promptDiv);
+          toggleMusic();
+        });
+        
+        document.getElementById('skipMusicBtn').addEventListener('click', () => {
+          document.body.removeChild(promptDiv);
+          showMusicStatus('無音モードを選択しました', 'info');
+        });
+        
+        // 10秒後に自動で閉じる
+        setTimeout(() => {
+          if (promptDiv.parentNode) {
+            document.body.removeChild(promptDiv);
+            showMusicStatus('音楽コントロールは右上から利用できます', 'info');
+          }
+        }, 10000);
+        
+        // ESCキーでプロンプトを閉じる
+        const closeOnEsc = (e) => {
+          if (e.key === 'Escape' && promptDiv.parentNode) {
+            document.body.removeChild(promptDiv);
+            document.removeEventListener('keydown', closeOnEsc);
+          }
+        };
+        document.addEventListener('keydown', closeOnEsc);
+      }
+      
+      // 各種ユーザーインタラクションを監視
+      ['click', 'keydown', 'touchstart'].forEach(event => {
+        document.addEventListener(event, handleFirstUserInteraction, { once: true });
+      });
       
       // 隠しイースターエッグ: コナミコマンド
       let konamiCode = [];
@@ -1203,18 +2662,220 @@
         }
       });
       
-      // スペースキーで音楽トグル
+      // キーボードショートカット強化
       document.addEventListener('keydown', (e) => {
+        // スペースキーで音楽トグル（入力フィールドでない場合のみ）
         if (e.code === 'Space' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+          const activeElement = document.activeElement;
+          if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            toggleMusic();
+          }
+        }
+        
+        // M キーで音楽トグル
+        if (e.code === 'KeyM' && !e.ctrlKey && !e.altKey && !e.metaKey) {
           e.preventDefault();
           toggleMusic();
         }
+        
+        // V キーでボリュームコントロール表示/非表示
+        if (e.code === 'KeyV' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+          e.preventDefault();
+          toggleVolumeControl();
+        }
+        
+        // 数字キー1-9でボリューム調整
+        if (e.code.startsWith('Digit') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+          const digit = parseInt(e.code.replace('Digit', ''));
+          if (digit >= 1 && digit <= 9) {
+            e.preventDefault();
+            const volume = digit / 10;
+            volumeSlider.value = volume;
+            volumeValue.textContent = Math.round(volume * 100) + '%';
+            
+            // 音量適用
+            if (masterGain) {
+              masterGain.gain.setValueAtTime(0.7 * volume, audioContext.currentTime);
+            }
+            if (melodyGain) {
+              melodyGain.gain.setValueAtTime(0.8 * volume, audioContext.currentTime);
+            }
+            if (droneGain) {
+              droneGain.gain.setValueAtTime(0.3 * volume, audioContext.currentTime);
+            }
+            if (tablaGain) {
+              tablaGain.gain.setValueAtTime(0.6 * volume, audioContext.currentTime);
+            }
+            
+            showMusicStatus(`🎚️ 音量: ${Math.round(volume * 100)}% (${digit}キー)`, 'info');
+          }
+        }
       });
       
-      // 初期化
+      // ヘルプ機能（H キー）とホログラフィックモード（Rキー）
+      document.addEventListener('keydown', (e) => {
+        if (e.code === 'KeyH' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+          e.preventDefault();
+          showHelpDialog();
+        }
+        
+        // Rキーでホログラフィックモードを切り替え
+        if (e.code === 'KeyR' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+          e.preventDefault();
+          toggleHolographicMode();
+        }
+      });
+      
+      function showHelpDialog() {
+        const helpDiv = document.createElement('div');
+        helpDiv.innerHTML = `
+          <div style="
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid rgba(138, 43, 226, 0.8);
+            border-radius: 20px;
+            padding: 25px;
+            color: #e5e7eb;
+            backdrop-filter: blur(15px);
+            z-index: 1003;
+            max-width: 400px;
+            animation: fadeInDown 0.5s ease-out;
+          ">
+            <div style="text-align: center; font-size: 20px; margin-bottom: 20px;">⌨️ キーボードショートカット</div>
+            <div style="display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; font-size: 14px; line-height: 1.6;">
+              <strong>スペース / M</strong><span>音楽 再生/停止</span>
+              <strong>V</strong><span>ボリューム調整</span>
+              <strong>1-9</strong><span>音量を10%-90%に設定</span>
+              <strong>R</strong><span>ホログラフィックモード</span>
+              <strong>H</strong><span>このヘルプを表示</span>
+              <strong>ESC</strong><span>ダイアログを閉じる</span>
+              <strong>↑↑↓↓←→←→BA</strong><span>秘密モード</span>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+              <button onclick="this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)" style="
+                background: rgba(138, 43, 226, 0.8);
+                border: 2px solid rgba(138, 43, 226, 0.6);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 12px;
+              ">閉じる</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(helpDiv);
+        
+        // ESCキーで閉じる
+        const closeOnEsc = (e) => {
+          if (e.key === 'Escape' && helpDiv.parentNode) {
+            document.body.removeChild(helpDiv);
+            document.removeEventListener('keydown', closeOnEsc);
+          }
+        };
+        document.addEventListener('keydown', closeOnEsc);
+        
+        // 10秒後に自動で閉じる
+        setTimeout(() => {
+          if (helpDiv.parentNode) {
+            document.body.removeChild(helpDiv);
+            document.removeEventListener('keydown', closeOnEsc);
+          }
+        }, 10000);
+      }
+      
+      // ホルコグラフィックモードの切り替え
+      function toggleHolographicMode() {
+        el.classList.toggle('holographic');
+        if (el.classList.contains('holographic')) {
+          showMusicStatus('🌈 ホログラフィックモード ON', 'info');
+        } else {
+          showMusicStatus('🌈 ホログラフィックモード OFF', 'info');
+        }
+      }
+      
+      // ホバー時の微細なパーティクル効果
+      function createHoverParticles(element) {
+        const rect = element.getBoundingClientRect();
+        const particles = ['✨', '⭐', '💫'];
+        
+        for (let i = 0; i < 3; i++) {
+          const particle = document.createElement('div');
+          particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+          particle.style.cssText = `
+            position: fixed;
+            left: ${rect.left + Math.random() * rect.width}px;
+            top: ${rect.top + Math.random() * rect.height}px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 999;
+            color: rgba(255, 215, 0, 0.8);
+            animation: hoverParticle 1s ease-out forwards;
+          `;
+          
+          document.body.appendChild(particle);
+          
+          setTimeout(() => {
+            if (particle.parentNode) {
+              particle.parentNode.removeChild(particle);
+            }
+          }, 1000);
+        }
+      }
+      
+      // 初期化（パフォーマンス最適化）
       updateLanguageDisplay();
       render();
-      const timer = setInterval(render, 1000);
+      
+      // setIntervalをrequestAnimationFrameで最適化したタイマー
+      let lastUpdateTime = 0;
+      const UPDATE_INTERVAL = 1000; // 1秒
+      
+      function animationLoop(currentTime) {
+        if (currentTime - lastUpdateTime >= UPDATE_INTERVAL) {
+          render();
+          lastUpdateTime = currentTime;
+        }
+        requestAnimationFrame(animationLoop);
+      }
+      
+      requestAnimationFrame(animationLoop);
+      
+      // 初期ボリューム表示を設定
+      volumeValue.textContent = Math.round(volumeSlider.value * 100) + '%';
+      
+      // ページ読み込み完了時のウェルカムメッセージ
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          showMusicStatus('💡 Hキーでキーボードショートカットを確認', 'info');
+        }, 2000);
+      });
+      
+      // パフォーマンス監視と最適化
+      if (typeof performance !== 'undefined') {
+        const performanceMetrics = {
+          loadTime: Math.round(performance.now()),
+          audioSupport: !!(window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext),
+          touchSupport: 'ontouchstart' in window,
+          memoryUsage: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + 'MB' : 'N/A',
+          devicePixelRatio: window.devicePixelRatio || 1,
+          hardwareConcurrency: navigator.hardwareConcurrency || 'N/A'
+        };
+        
+        console.log('🎵 Indian Music Counter loaded successfully');
+        console.log('💻 Performance:', performanceMetrics);
+        
+        // 低スペックデバイスの検出
+        if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) {
+          console.log('📱 Low-spec device detected, enabling performance mode');
+          document.body.classList.add('performance-mode');
+        }
+      }
     </script>
   </body>
 </html>
